@@ -12,7 +12,7 @@ This repository contains my solutions to each day's challenge, written in PHP. E
 
 ## Running the Solutions
 
-To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php solve.php` (input.txt file with input data not included here)
+To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php solve.php` (input.txt data not included here, per AOC policy)
 
 ## License
 
