@@ -2,6 +2,8 @@
 
 $lines = file('input.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
+// Part 1
+
 $leftList = [];
 $rightList = [];
 
@@ -24,9 +26,7 @@ for ($i = 0; $i < count($leftList); $i++) {
 
 echo "Total Distance: " . $totalDistance . PHP_EOL;
 
-/*
- * Figure out exactly how often each number from the left list appears in the right list. Calculate a total similarity score by adding up each number in the left list after multiplying it by the number of times that number appears in the right list.
- */
+// Part 2
 
 // Calculate the minimum distance
 $minDistance = PHP_INT_MAX;
