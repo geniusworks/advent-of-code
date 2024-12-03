@@ -21,7 +21,7 @@ This repository contains my solutions various challenge. Each solution is contai
 
 ## Running the Solutions
 
-To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php solve.php` (input.txt data not included here, per AOC policy)
+To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php solve.php` (input.txt data not included here, per AoC policy)
 
 ## License
 
