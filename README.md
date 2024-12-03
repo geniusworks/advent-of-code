@@ -17,11 +17,11 @@ Advent of Code is an annual event where programmers and coders come together to 
 
 ## Solutions
 
-This repository contains my solutions various challenge. Each solution is contained in a separate directory by year and challenge day number (e.g. `2024/01/`, `2024/02/`, etc.).
+This repository contains my solutions various challenge. Solutions are organized in separate directories by year (e.g. `2024/day01.php`, `2024/day02.php`, etc.).
 
 ## Running the Solutions
 
-To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php solve.php` (input.txt data not included here, per AoC policy)
+To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php dayXX.php` (input.txt data is not included, per AoC policy)
 
 ## License
 
