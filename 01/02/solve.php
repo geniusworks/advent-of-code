@@ -1,11 +1,8 @@
 <?php
 
-$lines = file('input.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+// Part 1
 
-// The unusual data (your puzzle input) consists of many reports, one report per line. Each report is a list of numbers called levels that are separated by spaces.
-// A report only counts as safe if both of the following are true:
-//   1. The levels are either all increasing or all decreasing.
-//   2. Any two adjacent levels differ by at least one and at most three.
+$lines = file('input.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 $safeReports = 0;
 
@@ -36,5 +33,44 @@ foreach ($lines as $line) {
     }
 }
 
-echo "Number of safe reports: $safeReports" . PHP_EOL;
+// Part 2
 
+$part2SafeReports = 0;
+for ($i = 0; $i < count($lines); $i++) {
+    $levels = array_map('intval', explode(' ', $lines[$i]));
+
+    $isSafe = false;
+    for ($j = 0; $j < count($levels); $j++) {
+        $newLevels = array_merge(array_slice($levels, 0, $j), array_slice($levels, $j + 1));
+        $isIncreasing = true;
+        $isDecreasing = true;
+        $isValid = true;
+
+        for ($k = 1; $k < count($newLevels); $k++) {
+            $diff = abs($newLevels[$k] - $newLevels[$k - 1]);
+
+            if ($diff < 1 || $diff > 3) {
+                $isValid = false;
+                break;
+            }
+
+            if ($newLevels[$k] > $newLevels[$k - 1]) {
+                $isDecreasing = false;
+            } elseif ($newLevels[$k] < $newLevels[$k - 1]) {
+                $isIncreasing = false;
+            }
+        }
+
+        if ($isValid && ($isIncreasing || $isDecreasing)) {
+            $isSafe = true;
+            break;
+        }
+    }
+
+    if ($isSafe) {
+        $part2SafeReports++;
+    }
+}
+
+echo "Number of safe reports (Part 1): $safeReports" . PHP_EOL;
+echo "Number of safe reports (Part 2): $part2SafeReports" . PHP_EOL;
