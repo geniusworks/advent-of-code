@@ -21,7 +21,7 @@ This repository contains my solutions various challenge. Solutions are organized
 
 ## Running the Solutions
 
-To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php dayXX.php` (input.txt data is not included, per AoC policy)
+To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php dayXX.php` (inputXX.txt data not included, per AoC policy)
 
 ## License
 
