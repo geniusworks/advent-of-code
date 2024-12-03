@@ -1,6 +1,6 @@
 # Advent of Code 2024 Solutions
 
-This repository contains my solutions to the Advent of Code 2024 challenges.
+This repository contains my solutions to the [Advent of Code 2024](https://adventofcode.com/2024) challenges.
 
 ## About Advent of Code
 
@@ -12,7 +12,7 @@ This repository contains my solutions to each day's challenge, written in PHP. E
 
 ## Running the Solutions
 
-To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php solve.php`
+To run any of the solutions, simply navigate to the corresponding directory and execute the solution file from a command line: `php solve.php` (input.txt file with input data not included here)
 
 ## License
 
