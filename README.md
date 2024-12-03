@@ -1,6 +1,15 @@
-# Advent of Code 2024 Solutions
+```
+    _       _                 _            __    ____          _      
+   / \   __| |_   _____ _ __ | |_    ___  / _|  / ___|___   __| | ___
+  / _ \ / _` \ \ / / _ \ '_ \| __|  / _ \| |_  | |   / _ \ / _` |/ _ \
+ / ___ \ (_| |\ V /  __/ | | | |_  | (_) |  _| | |__| (_) | (_| |  __/
+/_/   \_\__,_| \_/ \___|_| |_|\__|  \___/|_|    \____\___/ \__,_|\___|
 
-This repository contains my solutions to the [Advent of Code 2024](https://adventofcode.com/2024) challenges.
+```
+
+# Advent of Code Solutions
+
+This repository contains my solutions to [Advent of Code](https://adventofcode.com) challenges.
 
 ## About Advent of Code
 
@@ -8,7 +17,7 @@ Advent of Code is an annual event where programmers and coders come together to 
 
 ## Solutions
 
-This repository contains my solutions to each day's challenge, written in PHP. Each solution is contained in a separate file or directory, labeled by day number (e.g. `01`, `02`, etc.).
+This repository contains my solutions various challenge. Each solution is contained in a separate directory by year and challenge day number (e.g. `2024/01/`, `2024/02/`, etc.).
 
 ## Running the Solutions
 
