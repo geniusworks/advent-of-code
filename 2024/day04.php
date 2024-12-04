@@ -75,3 +75,63 @@ echo "Total occurrences of XMAS: $xmasCount\n";
 
 // Part 2
 
+function find_a_positions($grid): array
+{
+    $a_positions = [];
+    $rows = count($grid);
+    $cols = strlen($grid[0]);
+
+    for ($i = 1; $i < $rows - 1; $i++) {
+        for ($j = 1; $j < $cols - 1; $j++) {
+            if ($grid[$i][$j] == 'A') {
+                $a_positions[] = [$i, $j];
+            }
+        }
+    }
+
+    return $a_positions;
+}
+
+function validate_a_positions($grid, $a_positions): array
+{
+    $valid_positions = [];
+    $invalid_positions = [];
+
+    foreach ($a_positions as $position) {
+        $i = $position[0];
+        $j = $position[1];
+
+        $match_count = 0;
+
+        // Check top-left to bottom-right diagonal
+        if ($grid[$i - 1][$j - 1] == 'M' && $grid[$i + 1][$j + 1] == 'S') {
+            $match_count++;
+        }
+
+        // Check top-right to bottom-left diagonal
+        if ($grid[$i - 1][$j + 1] == 'M' && $grid[$i + 1][$j - 1] == 'S') {
+            $match_count++;
+        }
+
+        // Check top-left to bottom-right diagonal (reverse)
+        if ($grid[$i - 1][$j - 1] == 'S' && $grid[$i + 1][$j + 1] == 'M') {
+            $match_count++;
+        }
+
+        // Check top-right to bottom-left diagonal (reverse)
+        if ($grid[$i - 1][$j + 1] == 'S' && $grid[$i + 1][$j - 1] == 'M') {
+            $match_count++;
+        }
+
+        if ($match_count == 2) {
+            $valid_positions[] = $position;
+        }
+    }
+
+    return $valid_positions;
+}
+
+$a_positions = find_a_positions($lines);
+$valid_positions = validate_a_positions($lines, $a_positions);
+
+echo "Total occurrences of X-MAS: " . count($valid_positions) . PHP_EOL;
