@@ -95,7 +95,6 @@ function find_a_positions($grid): array
 function validate_a_positions($grid, $a_positions): array
 {
     $valid_positions = [];
-    $invalid_positions = [];
 
     foreach ($a_positions as $position) {
         $i = $position[0];
