@@ -9,14 +9,14 @@ $result = 0;
 foreach ($lines as $line) {
     preg_match_all('/mul\((\d+),(\d+)\)/', $line, $matches, PREG_SET_ORDER);
     foreach ($matches as $match) {
-        echo "Found valid mul instruction: mul(" . $match[1] . "," . $match[2] . ")\n";
+        // echo "Found valid mul instruction: mul(" . $match[1] . "," . $match[2] . ")\n";
         $num1 = (int) $match[1];
         $num2 = (int) $match[2];
         $result += $num1 * $num2;
     }
 }
 
-echo "Final result: $result\n";
+echo "Final result (Part 1): $result\n";
 
 // Part 2
 
@@ -31,7 +31,7 @@ foreach ($lines as $line) {
         } elseif ($match[2] == "don't()") {
             $isEnabled = false;
         } elseif ($match[3] && $isEnabled) {
-            echo "Found valid mul instruction: mul(" . $match[3] . "," . $match[4] . ")\n";
+            // echo "Found valid mul instruction: mul(" . $match[3] . "," . $match[4] . ")\n";
             $num1 = (int) $match[3];
             $num2 = (int) $match[4];
             $part2Result += $num1 * $num2;
