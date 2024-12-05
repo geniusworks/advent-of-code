@@ -19,46 +19,72 @@ foreach ($lines as $line) {
     }
 }
 
-echo "Rules:\n";
-print_r($rules);
-echo "\nUpdates:\n";
-print_r($updates);
-
 $validUpdates = [];
 foreach ($updates as $update) {
-    echo "Checking update: " . implode(',', $update) . "\n";
     $isValid = true;
     foreach ($rules as $rule) {
         if (in_array($rule[0], $update) && in_array($rule[1], $update)) {
             $index0 = array_search($rule[0], $update);
             $index1 = array_search($rule[1], $update);
-            echo "  Rule: " . $rule[0] . "|" . $rule[1] . ", Indexes: $index0, $index1\n";
             if ($index0 > $index1) {
-                echo "  Invalid update: $index0 > $index1\n";
                 $isValid = false;
                 break;
             }
         }
     }
     if ($isValid) {
-        echo "  Valid update!\n";
         $validUpdates[] = $update;
     }
 }
 
-echo "\nValid Updates:\n";
-print_r($validUpdates);
-
 $middles = [];
 foreach ($validUpdates as $update) {
     $middleIndex = floor(count($update) / 2);
-    echo "  Middle index: $middleIndex, Middle value: " . $update[$middleIndex] . "\n";
     $middles[] = (int)$update[$middleIndex];
 }
 
 $sum = array_sum($middles);
 
-echo "\nSum of middle numbers: $sum\n";
+echo "Sum of middle numbers for correctly ordered updates: $sum\n";
 
 // Part 2
 
+$invalidUpdates = [];
+foreach ($updates as $update) {
+    $isValid = true;
+    foreach ($rules as $rule) {
+        if (in_array($rule[0], $update) && in_array($rule[1], $update)) {
+            $index0 = array_search($rule[0], $update);
+            $index1 = array_search($rule[1], $update);
+            if ($index0 > $index1) {
+                $isValid = false;
+                break;
+            }
+        }
+    }
+    if (!$isValid) {
+        $invalidUpdates[] = $update;
+    }
+}
+
+$middlePageNumbers = [];
+foreach ($invalidUpdates as $update) {
+    $sortedUpdate = $update;
+    for ($i = 0; $i < count($sortedUpdate); $i++) {
+        for ($j = $i + 1; $j < count($sortedUpdate); $j++) {
+            foreach ($rules as $rule) {
+                if ($sortedUpdate[$i] == $rule[1] && $sortedUpdate[$j] == $rule[0]) {
+                    $temp = $sortedUpdate[$i];
+                    $sortedUpdate[$i] = $sortedUpdate[$j];
+                    $sortedUpdate[$j] = $temp;
+                }
+            }
+        }
+    }
+    $middleIndex = floor(count($sortedUpdate) / 2);
+    $middlePageNumbers[] = (int)$sortedUpdate[$middleIndex];
+}
+
+$sumOfMiddlePageNumbers = array_sum($middlePageNumbers);
+
+echo "Sum of middle numbers for incorrectly ordered updates: $sumOfMiddlePageNumbers\n";
