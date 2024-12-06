@@ -8,7 +8,7 @@ function find_xmas_occurrences($lines): int
     $xmasOccurrences = 0;
 
     // Function to check occurrence with preserved original logic
-    $checkOccurrence = function($chars, $pattern) {
+    $checkOccurrence = function ($chars, $pattern) {
         return implode('', $chars) === $pattern;
     };
 
@@ -19,9 +19,9 @@ function find_xmas_occurrences($lines): int
                 // Forward horizontal
                 $horizontalChars = [
                     $line[$j],
-                    $line[$j+1],
-                    $line[$j+2],
-                    $line[$j+3]
+                    $line[$j + 1],
+                    $line[$j + 2],
+                    $line[$j + 3],
                 ];
                 if ($checkOccurrence($horizontalChars, 'XMAS')) {
                     $xmasOccurrences++;
@@ -37,7 +37,7 @@ function find_xmas_occurrences($lines): int
                     $line[$j],
                     $lines[$i + 1][$j],
                     $lines[$i + 2][$j],
-                    $lines[$i + 3][$j]
+                    $lines[$i + 3][$j],
                 ];
                 if ($checkOccurrence($verticalChars, 'XMAS')) {
                     $xmasOccurrences++;
@@ -53,7 +53,7 @@ function find_xmas_occurrences($lines): int
                     $line[$j],
                     $lines[$i + 1][$j + 1],
                     $lines[$i + 2][$j + 2],
-                    $lines[$i + 3][$j + 3]
+                    $lines[$i + 3][$j + 3],
                 ];
                 if ($checkOccurrence($diagonalChars, 'XMAS')) {
                     $xmasOccurrences++;
@@ -69,7 +69,7 @@ function find_xmas_occurrences($lines): int
                     $line[$j],
                     $lines[$i - 1][$j + 1],
                     $lines[$i - 2][$j + 2],
-                    $lines[$i - 3][$j + 3]
+                    $lines[$i - 3][$j + 3],
                 ];
                 if ($checkOccurrence($diagonalChars, 'XMAS')) {
                     $xmasOccurrences++;
