@@ -1,92 +1,119 @@
 <?php
 
-$lines = file('input05.txt', FILE_IGNORE_NEW_LINES);
+// Advent of Code 2024 Day 5
+// Martin Diekhoff
 
-// Part 1
+class UpdateValidator
+{
+    private array $rules;
+    private array $updates;
 
-$rules = [];
-$updates = [];
-
-$ruleSection = true;
-foreach ($lines as $line) {
-    if (trim($line) === '') {
-        $ruleSection = false;
-        continue;
+    public function __construct(array $lines)
+    {
+        [$this->rules, $this->updates] = $this->parseInput($lines);
     }
 
-    if ($ruleSection) {
-        $rules[] = explode('|', $line);
-    } else {
-        $updates[] = explode(',', $line);
-    }
-}
+    private function parseInput(array $lines): array
+    {
+        $rules = [];
+        $updates = [];
+        $ruleSection = true;
 
-$validUpdates = [];
-foreach ($updates as $update) {
-    $isValid = true;
-    foreach ($rules as $rule) {
-        if (in_array($rule[0], $update) && in_array($rule[1], $update)) {
+        foreach ($lines as $line) {
+            if (trim($line) === '') {
+                $ruleSection = false;
+                continue;
+            }
+
+            $ruleSection
+                ? $rules[] = explode('|', $line)
+                : $updates[] = explode(',', $line);
+        }
+
+        return [$rules, $updates];
+    }
+
+    public function validateUpdates(): array
+    {
+        return array_filter($this->updates, function ($update) {
+            return $this->isUpdateValid($update);
+        });
+    }
+
+    private function isUpdateValid(array $update): bool
+    {
+        foreach ($this->rules as $rule) {
             $index0 = array_search($rule[0], $update);
             $index1 = array_search($rule[1], $update);
-            if ($index0 > $index1) {
-                $isValid = false;
-                break;
+
+            if ($index0 !== false && $index1 !== false && $index0 > $index1) {
+                return false;
             }
         }
+        return true;
     }
-    if ($isValid) {
-        $validUpdates[] = $update;
+
+    public function getMiddleNumbers(array $updateSet): int
+    {
+        $middles = array_map(function ($update) {
+            $middleIndex = floor(count($update) / 2);
+            return (int)$update[$middleIndex];
+        }, $updateSet);
+
+        return array_sum($middles);
     }
-}
 
-$middles = [];
-foreach ($validUpdates as $update) {
-    $middleIndex = floor(count($update) / 2);
-    $middles[] = (int)$update[$middleIndex];
-}
-
-$sum = array_sum($middles);
-
-echo "Sum of middle numbers for correctly ordered updates: $sum\n";
-
-// Part 2
-
-$invalidUpdates = [];
-foreach ($updates as $update) {
-    $isValid = true;
-    foreach ($rules as $rule) {
-        if (in_array($rule[0], $update) && in_array($rule[1], $update)) {
-            $index0 = array_search($rule[0], $update);
-            $index1 = array_search($rule[1], $update);
-            if ($index0 > $index1) {
-                $isValid = false;
-                break;
-            }
-        }
-    }
-    if (!$isValid) {
-        $invalidUpdates[] = $update;
-    }
-}
-
-$middlePageNumbers = [];
-foreach ($invalidUpdates as $update) {
-    $sortedUpdate = $update;
-    for ($i = 0; $i < count($sortedUpdate); $i++) {
-        for ($j = $i + 1; $j < count($sortedUpdate); $j++) {
-            foreach ($rules as $rule) {
-                if ($sortedUpdate[$i] == $rule[1] && $sortedUpdate[$j] == $rule[0]) {
-                    $temp = $sortedUpdate[$i];
-                    $sortedUpdate[$i] = $sortedUpdate[$j];
-                    $sortedUpdate[$j] = $temp;
+    public function sortInvalidUpdates(array $updates): array
+    {
+        return array_map(function ($update) {
+            $sortedUpdate = $update;
+            for ($i = 0; $i < count($sortedUpdate); $i++) {
+                for ($j = $i + 1; $j < count($sortedUpdate); $j++) {
+                    foreach ($this->rules as $rule) {
+                        if ($sortedUpdate[$i] == $rule[1] && $sortedUpdate[$j] == $rule[0]) {
+                            // Swap elements
+                            [$sortedUpdate[$i], $sortedUpdate[$j]] = [$sortedUpdate[$j], $sortedUpdate[$i]];
+                        }
+                    }
                 }
             }
-        }
+            return $sortedUpdate;
+        }, $updates);
     }
-    $middleIndex = floor(count($sortedUpdate) / 2);
-    $middlePageNumbers[] = (int)$sortedUpdate[$middleIndex];
+
+    public function getInvalidUpdates(): array
+    {
+        return array_filter($this->updates, function ($update) {
+            return !$this->isUpdateValid($update);
+        });
+    }
 }
 
-$sumOfMiddlePageNumbers = array_sum($middlePageNumbers);
+// Main script
+$start_time = microtime(true);
+$start_memory = memory_get_usage(true);
 
-echo "Sum of middle numbers for incorrectly ordered updates: $sumOfMiddlePageNumbers\n";
+// Read input
+$lines = file('input05.txt', FILE_IGNORE_NEW_LINES);
+
+// Create validator
+$validator = new UpdateValidator($lines);
+
+// Part 1: Correctly ordered updates
+$validUpdates = $validator->validateUpdates();
+$sumOfValidMiddles = $validator->getMiddleNumbers($validUpdates);
+
+// Part 2: Reordered invalid updates
+$invalidUpdates = $validator->getInvalidUpdates();
+$sortedInvalidUpdates = $validator->sortInvalidUpdates($invalidUpdates);
+$sumOfInvalidMiddles = $validator->getMiddleNumbers($sortedInvalidUpdates);
+
+// Output results
+echo "Sum of middle numbers for correctly ordered updates: $sumOfValidMiddles\n";
+echo "Sum of middle numbers for incorrectly ordered updates: $sumOfInvalidMiddles\n";
+
+$end_time = microtime(true);
+$end_memory = memory_get_usage(true);
+
+echo "Time elapsed: " . ($end_time - $start_time) . " seconds\n";
+echo "Memory usage: " . ($end_memory - $start_memory) . " bytes\n";
