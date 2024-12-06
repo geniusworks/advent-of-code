@@ -1,79 +1,88 @@
 <?php
 
-$lines = file('input04.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+// Advent of Code 2024 Day 4
+// Martin Diekhoff
 
-// Part 1
+function find_xmas_occurrences($lines): int
+{
+    $xmasOccurrences = 0;
 
-// Initialize count of XMAS occurrences
-$xmasCount = 0;
+    // Function to check occurrence with preserved original logic
+    $checkOccurrence = function($chars, $pattern) {
+        return implode('', $chars) === $pattern;
+    };
 
-// Iterate over each line in the word search puzzle
-for ($i = 0; $i < count($lines); $i++) {
-    // Iterate over each character in the line
-    for ($j = 0; $j < strlen($lines[$i]); $j++) {
-        // Check for horizontal occurrence of XMAS
-        if ($j < strlen($lines[$i]) - 3 && substr($lines[$i], $j, 4) === 'XMAS') {
-            $xmasCount++;
-        }
-
-        // Check for vertical occurrence of XMAS
-        if ($i < count($lines) - 3 && $j < strlen($lines[$i])) {
-            $verticalString = $lines[$i][$j] . $lines[$i + 1][$j] . $lines[$i + 2][$j] . $lines[$i + 3][$j];
-            if ($verticalString === 'XMAS') {
-                $xmasCount++;
+    foreach ($lines as $i => $line) {
+        for ($j = 0; $j < strlen($line); $j++) {
+            // Horizontal checks
+            if ($j + 3 < strlen($line)) {
+                // Forward horizontal
+                $horizontalChars = [
+                    $line[$j],
+                    $line[$j+1],
+                    $line[$j+2],
+                    $line[$j+3]
+                ];
+                if ($checkOccurrence($horizontalChars, 'XMAS')) {
+                    $xmasOccurrences++;
+                }
+                if ($checkOccurrence($horizontalChars, 'SAMX')) {
+                    $xmasOccurrences++;
+                }
             }
-        }
 
-        // Check for diagonal occurrence of XMAS (top-left to bottom-right)
-        if ($i < count($lines) - 3 && $j < strlen($lines[$i]) - 3) {
-            $diagonalString = $lines[$i][$j] . $lines[$i + 1][$j + 1] . $lines[$i + 2][$j + 2] . $lines[$i + 3][$j + 3];
-            if ($diagonalString === 'XMAS') {
-                $xmasCount++;
+            // Vertical checks
+            if ($i + 3 < count($lines) && $j < strlen($line)) {
+                $verticalChars = [
+                    $line[$j],
+                    $lines[$i + 1][$j],
+                    $lines[$i + 2][$j],
+                    $lines[$i + 3][$j]
+                ];
+                if ($checkOccurrence($verticalChars, 'XMAS')) {
+                    $xmasOccurrences++;
+                }
+                if ($checkOccurrence($verticalChars, 'SAMX')) {
+                    $xmasOccurrences++;
+                }
             }
-        }
 
-        // Check for diagonal occurrence of XMAS (bottom-left to top-right)
-        if ($i > 2 && $j < strlen($lines[$i]) - 3) {
-            $diagonalString = $lines[$i][$j] . $lines[$i - 1][$j + 1] . $lines[$i - 2][$j + 2] . $lines[$i - 3][$j + 3];
-            if ($diagonalString === 'XMAS') {
-                $xmasCount++;
+            // Diagonal top-left to bottom-right checks
+            if ($i + 3 < count($lines) && $j + 3 < strlen($line)) {
+                $diagonalChars = [
+                    $line[$j],
+                    $lines[$i + 1][$j + 1],
+                    $lines[$i + 2][$j + 2],
+                    $lines[$i + 3][$j + 3]
+                ];
+                if ($checkOccurrence($diagonalChars, 'XMAS')) {
+                    $xmasOccurrences++;
+                }
+                if ($checkOccurrence($diagonalChars, 'SAMX')) {
+                    $xmasOccurrences++;
+                }
             }
-        }
 
-        // Check for reverse horizontal occurrence of XMAS
-        if ($j < strlen($lines[$i]) - 3 && substr($lines[$i], $j, 4) === 'SAMX') {
-            $xmasCount++;
-        }
-
-        // Check for reverse vertical occurrence of XMAS
-        if ($i < count($lines) - 3 && $j < strlen($lines[$i])) {
-            $verticalString = $lines[$i][$j] . $lines[$i + 1][$j] . $lines[$i + 2][$j] . $lines[$i + 3][$j];
-            if ($verticalString === 'SAMX') {
-                $xmasCount++;
-            }
-        }
-
-        // Check for reverse diagonal occurrence of XMAS (top-left to bottom-right)
-        if ($i < count($lines) - 3 && $j < strlen($lines[$i]) - 3) {
-            $diagonalString = $lines[$i][$j] . $lines[$i + 1][$j + 1] . $lines[$i + 2][$j + 2] . $lines[$i + 3][$j + 3];
-            if ($diagonalString === 'SAMX') {
-                $xmasCount++;
-            }
-        }
-
-        // Check for reverse diagonal occurrence of XMAS (bottom-left to top-right)
-        if ($i > 2 && $j < strlen($lines[$i]) - 3) {
-            $diagonalString = $lines[$i][$j] . $lines[$i - 1][$j + 1] . $lines[$i - 2][$j + 2] . $lines[$i - 3][$j + 3];
-            if ($diagonalString === 'SAMX') {
-                $xmasCount++;
+            // Diagonal bottom-left to top-right checks
+            if ($i - 3 >= 0 && $j + 3 < strlen($line)) {
+                $diagonalChars = [
+                    $line[$j],
+                    $lines[$i - 1][$j + 1],
+                    $lines[$i - 2][$j + 2],
+                    $lines[$i - 3][$j + 3]
+                ];
+                if ($checkOccurrence($diagonalChars, 'XMAS')) {
+                    $xmasOccurrences++;
+                }
+                if ($checkOccurrence($diagonalChars, 'SAMX')) {
+                    $xmasOccurrences++;
+                }
             }
         }
     }
+
+    return $xmasOccurrences;
 }
-
-echo "Total occurrences of XMAS: $xmasCount\n";
-
-// Part 2
 
 function find_a_positions($grid): array
 {
@@ -97,8 +106,7 @@ function validate_a_positions($grid, $a_positions): array
     $valid_positions = [];
 
     foreach ($a_positions as $position) {
-        $i = $position[0];
-        $j = $position[1];
+        [$i, $j] = $position;
 
         $match_count = 0;
 
@@ -130,7 +138,24 @@ function validate_a_positions($grid, $a_positions): array
     return $valid_positions;
 }
 
+// Main script
+$start_time = microtime(true);
+$start_memory = memory_get_usage(true);
+
+$lines = file('input04.txt', FILE_IGNORE_NEW_LINES);
+
+// Part 1
+$xmasOccurrences = find_xmas_occurrences($lines);
+
+// Part 2
 $a_positions = find_a_positions($lines);
 $valid_positions = validate_a_positions($lines, $a_positions);
 
-echo "Total occurrences of X-MAS: " . count($valid_positions) . PHP_EOL;
+echo "Total occurrences of XMAS: $xmasOccurrences\n";
+echo "Total occurrences of X-MAS: " . count($valid_positions) . "\n";
+
+$end_time = microtime(true);
+$end_memory = memory_get_usage(true);
+
+echo "Time elapsed: " . ($end_time - $start_time) . " seconds\n";
+echo "Memory usage: " . ($end_memory - $start_memory) . " bytes\n";
