@@ -2,6 +2,8 @@
 
 $lines = file('input05.txt', FILE_IGNORE_NEW_LINES);
 
+// Part 1
+
 $rules = [];
 $updates = [];
 
