@@ -1,42 +1,40 @@
 <?php
 
+// Advent of Code 2024 Day 3
+// Martin Diekhoff
+
+$start_time = microtime(true);
+$start_memory = memory_get_usage(true);
+
 $lines = file('input03.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-// Part 1
+function calculateResult($lines, $part): float|int
+{
+    $result = 0;
+    $isEnabled = true;
 
-$result = 0;
+    foreach ($lines as $line) {
+        preg_match_all('/(do\(\))|(don\'t\(\))|mul\((\d+),(\d+)\)/', $line, $matches, PREG_SET_ORDER);
 
-foreach ($lines as $line) {
-    preg_match_all('/mul\((\d+),(\d+)\)/', $line, $matches, PREG_SET_ORDER);
-    foreach ($matches as $match) {
-        // echo "Found valid mul instruction: mul(" . $match[1] . "," . $match[2] . ")\n";
-        $num1 = (int) $match[1];
-        $num2 = (int) $match[2];
-        $result += $num1 * $num2;
-    }
-}
-
-echo "Final result (Part 1): $result\n";
-
-// Part 2
-
-$part2Result = 0;
-$isEnabled = true;
-
-foreach ($lines as $line) {
-    preg_match_all('/(do\(\))|(don\'t\(\))|mul\((\d+),(\d+)\)/', $line, $matches, PREG_SET_ORDER);
-    foreach ($matches as $match) {
-        if ($match[1] == 'do()') {
-            $isEnabled = true;
-        } elseif ($match[2] == "don't()") {
-            $isEnabled = false;
-        } elseif ($match[3] && $isEnabled) {
-            // echo "Found valid mul instruction: mul(" . $match[3] . "," . $match[4] . ")\n";
-            $num1 = (int) $match[3];
-            $num2 = (int) $match[4];
-            $part2Result += $num1 * $num2;
+        foreach ($matches as $match) {
+            if ($match[1] == 'do()') {
+                $isEnabled = true;
+            } elseif ($match[2] == "don't()") {
+                $isEnabled = false;
+            } elseif ($match[3] && ($part == 1 || $isEnabled)) {
+                $result += (int)$match[3] * (int)$match[4];
+            }
         }
     }
+
+    return $result;
 }
 
-echo "Final result (Part 2): $part2Result\n";
+echo "Final result (Part 1): " . calculateResult($lines, 1) . PHP_EOL;
+echo "Final result (Part 2): " . calculateResult($lines, 2) . PHP_EOL;
+
+$end_time = microtime(true);
+$end_memory = memory_get_usage(true);
+
+echo "Time elapsed: " . ($end_time - $start_time) . " seconds" . PHP_EOL;
+echo "Memory usage: " . ($end_memory - $start_memory) . " bytes" . PHP_EOL;
