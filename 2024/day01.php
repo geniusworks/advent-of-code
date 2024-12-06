@@ -1,64 +1,40 @@
 <?php
 
-$lines = file('input01.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+// Advent of Code 2024 Day 1
+// Martin Diekhoff
 
-// Part 1
+$start_time = microtime(true);
+$start_memory = memory_get_usage(true);
+
+$lines = file('input01.txt', FILE_IGNORE_NEW_LINES);
 
 $leftList = [];
 $rightList = [];
 
-// Process each line to extract the left and right numbers
 foreach ($lines as $line) {
-    list($left, $right) = array_map('intval', explode('   ', $line));
+    [$left, $right] = array_map('intval', explode('   ', $line));
     $leftList[] = $left;
     $rightList[] = $right;
 }
 
-// Sort both lists
 sort($leftList);
 sort($rightList);
 
-// Calculate the total distance
-$totalDistance = 0;
-for ($i = 0; $i < count($leftList); $i++) {
-    $totalDistance += abs($leftList[$i] - $rightList[$i]);
-}
+$totalDistance = array_sum(array_map(function ($left, $right) {
+    return abs($left - $right);
+}, $leftList, $rightList));
 
-echo "Total Distance: " . $totalDistance . PHP_EOL;
+echo "Total Distance: $totalDistance" . PHP_EOL;
 
-// Part 2
-
-// Calculate the minimum distance
-$minDistance = PHP_INT_MAX;
-for ($i = 0; $i < count($leftList); $i++) {
-    $distance = abs($leftList[$i] - $rightList[$i]);
-    if ($distance < $minDistance) {
-        $minDistance = $distance;
-    }
-}
-
-// Calculate the maximum distance
-$maxDistance = 0;
-for ($i = 0; $i < count($leftList); $i++) {
-    $distance = abs($leftList[$i] - $rightList[$i]);
-    if ($distance > $maxDistance) {
-        $maxDistance = $distance;
-    }
-}
-
-// Calculate the similarity score
 $similarityScore = 0;
 foreach ($leftList as $left) {
-    $count = 0;
-    foreach ($rightList as $right) {
-        if ($left == $right) {
-            $count++;
-        }
-    }
-    $similarityScore += $left * $count;
+    $similarityScore += $left * count(array_keys($rightList, $left));
 }
 
-// Print the results
-echo "Minimum Distance: " . $minDistance . PHP_EOL;
-echo "Maximum Distance: " . $maxDistance . PHP_EOL;
-echo "Similarity Score: " . $similarityScore . PHP_EOL;
+echo "Similarity Score: $similarityScore" . PHP_EOL;
+
+$end_time = microtime(true);
+$end_memory = memory_get_usage(true);
+
+echo "Time elapsed: " . ($end_time - $start_time) . " seconds" . PHP_EOL;
+echo "Memory usage: " . ($end_memory - $start_memory) . " bytes" . PHP_EOL;
