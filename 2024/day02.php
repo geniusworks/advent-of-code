@@ -6,12 +6,12 @@
 $start_time = microtime(true);
 $start_memory = memory_get_usage(true);
 
-$lines = file('input02.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+$input = file('input02.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 $safeReports = 0;
 $part2SafeReports = 0;
 
-foreach ($lines as $line) {
+foreach ($input as $line) {
     $levels = array_map('intval', explode(' ', $line));
 
     if (isValid($levels)) {

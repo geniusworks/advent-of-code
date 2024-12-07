@@ -8,18 +8,18 @@ class UpdateValidator
     private array $rules;
     private array $updates;
 
-    public function __construct(array $lines)
+    public function __construct(array $input)
     {
-        [$this->rules, $this->updates] = $this->parseInput($lines);
+        [$this->rules, $this->updates] = $this->parseInput($input);
     }
 
-    private function parseInput(array $lines): array
+    private function parseInput(array $input): array
     {
         $rules = [];
         $updates = [];
         $ruleSection = true;
 
-        foreach ($lines as $line) {
+        foreach ($input as $line) {
             if (trim($line) === '') {
                 $ruleSection = false;
                 continue;
@@ -94,10 +94,10 @@ $start_time = microtime(true);
 $start_memory = memory_get_usage(true);
 
 // Read input
-$lines = file('input05.txt', FILE_IGNORE_NEW_LINES);
+$input = file('input05.txt', FILE_IGNORE_NEW_LINES);
 
 // Create validator
-$validator = new UpdateValidator($lines);
+$validator = new UpdateValidator($input);
 
 // Part 1: Correctly ordered updates
 $validUpdates = $validator->validateUpdates();

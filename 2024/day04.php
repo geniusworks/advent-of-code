@@ -3,7 +3,7 @@
 // Advent of Code 2024 Day 4
 // Martin Diekhoff
 
-function find_xmas_occurrences($lines): int
+function find_xmas_occurrences($input): int
 {
     $xmasOccurrences = 0;
 
@@ -12,7 +12,7 @@ function find_xmas_occurrences($lines): int
         return implode('', $chars) === $pattern;
     };
 
-    foreach ($lines as $i => $line) {
+    foreach ($input as $i => $line) {
         for ($j = 0; $j < strlen($line); $j++) {
             // Horizontal checks
             if ($j + 3 < strlen($line)) {
@@ -32,12 +32,12 @@ function find_xmas_occurrences($lines): int
             }
 
             // Vertical checks
-            if ($i + 3 < count($lines) && $j < strlen($line)) {
+            if ($i + 3 < count($input) && $j < strlen($line)) {
                 $verticalChars = [
                     $line[$j],
-                    $lines[$i + 1][$j],
-                    $lines[$i + 2][$j],
-                    $lines[$i + 3][$j],
+                    $input[$i + 1][$j],
+                    $input[$i + 2][$j],
+                    $input[$i + 3][$j],
                 ];
                 if ($checkOccurrence($verticalChars, 'XMAS')) {
                     $xmasOccurrences++;
@@ -48,12 +48,12 @@ function find_xmas_occurrences($lines): int
             }
 
             // Diagonal top-left to bottom-right checks
-            if ($i + 3 < count($lines) && $j + 3 < strlen($line)) {
+            if ($i + 3 < count($input) && $j + 3 < strlen($line)) {
                 $diagonalChars = [
                     $line[$j],
-                    $lines[$i + 1][$j + 1],
-                    $lines[$i + 2][$j + 2],
-                    $lines[$i + 3][$j + 3],
+                    $input[$i + 1][$j + 1],
+                    $input[$i + 2][$j + 2],
+                    $input[$i + 3][$j + 3],
                 ];
                 if ($checkOccurrence($diagonalChars, 'XMAS')) {
                     $xmasOccurrences++;
@@ -67,9 +67,9 @@ function find_xmas_occurrences($lines): int
             if ($i - 3 >= 0 && $j + 3 < strlen($line)) {
                 $diagonalChars = [
                     $line[$j],
-                    $lines[$i - 1][$j + 1],
-                    $lines[$i - 2][$j + 2],
-                    $lines[$i - 3][$j + 3],
+                    $input[$i - 1][$j + 1],
+                    $input[$i - 2][$j + 2],
+                    $input[$i - 3][$j + 3],
                 ];
                 if ($checkOccurrence($diagonalChars, 'XMAS')) {
                     $xmasOccurrences++;
@@ -142,14 +142,14 @@ function validate_a_positions($grid, $a_positions): array
 $start_time = microtime(true);
 $start_memory = memory_get_usage(true);
 
-$lines = file('input04.txt', FILE_IGNORE_NEW_LINES);
+$input = file('input04.txt', FILE_IGNORE_NEW_LINES);
 
 // Part 1
-$xmasOccurrences = find_xmas_occurrences($lines);
+$xmasOccurrences = find_xmas_occurrences($input);
 
 // Part 2
-$a_positions = find_a_positions($lines);
-$valid_positions = validate_a_positions($lines, $a_positions);
+$a_positions = find_a_positions($input);
+$valid_positions = validate_a_positions($input, $a_positions);
 
 echo "Total occurrences of XMAS: $xmasOccurrences\n";
 echo "Total occurrences of X-MAS: " . count($valid_positions) . "\n";

@@ -92,10 +92,10 @@ class GuardMovementSimulator
 }
 
 // Main script
-$lines = file('input06.txt', FILE_IGNORE_NEW_LINES);
+$input = file('input06.txt', FILE_IGNORE_NEW_LINES);
 
 try {
-    $simulator = new GuardMovementSimulator($lines);
+    $simulator = new GuardMovementSimulator($input);
     $result = $simulator->simulate();
 
     echo "Distinct map positions occupied (Part 1): " . $result[0] . PHP_EOL;

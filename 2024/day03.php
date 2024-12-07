@@ -6,14 +6,14 @@
 $start_time = microtime(true);
 $start_memory = memory_get_usage(true);
 
-$lines = file('input03.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+$input = file('input03.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-function calculateResult($lines, $part): float|int
+function calculateResult($input, $part): float|int
 {
     $result = 0;
     $isEnabled = true;
 
-    foreach ($lines as $line) {
+    foreach ($input as $line) {
         preg_match_all('/(do\(\))|(don\'t\(\))|mul\((\d+),(\d+)\)/', $line, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $match) {
@@ -30,8 +30,8 @@ function calculateResult($lines, $part): float|int
     return $result;
 }
 
-echo "Final result (Part 1): " . calculateResult($lines, 1) . PHP_EOL;
-echo "Final result (Part 2): " . calculateResult($lines, 2) . PHP_EOL;
+echo "Final result (Part 1): " . calculateResult($input, 1) . PHP_EOL;
+echo "Final result (Part 2): " . calculateResult($input, 2) . PHP_EOL;
 
 $end_time = microtime(true);
 $end_memory = memory_get_usage(true);

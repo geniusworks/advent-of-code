@@ -6,12 +6,12 @@
 $start_time = microtime(true);
 $start_memory = memory_get_usage(true);
 
-$lines = file('input01.txt', FILE_IGNORE_NEW_LINES);
+$input = file('input01.txt', FILE_IGNORE_NEW_LINES);
 
 $leftList = [];
 $rightList = [];
 
-foreach ($lines as $line) {
+foreach ($input as $line) {
     [$left, $right] = array_map('intval', explode('   ', $line));
     $leftList[] = $left;
     $rightList[] = $right;
