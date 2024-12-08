@@ -24,7 +24,7 @@ $template = <<<EOT
 <?php
 /**
  * Advent of Code {$year}
- * Day {$day}:
+ * Day {$day}: 
  *
  * @author Martin Diekhoff
  * @link https://adventofcode.com/{$year}/day/{$day}
