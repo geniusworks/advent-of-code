@@ -8,7 +8,6 @@
  */
 
 $start_time = microtime(true);
-$start_memory = memory_get_usage(true);
 
 $input = file('input01.txt', FILE_IGNORE_NEW_LINES);
 
@@ -38,7 +37,6 @@ foreach ($leftList as $left) {
 echo "Similarity Score: $similarityScore" . PHP_EOL;
 
 $end_time = microtime(true);
-$end_memory = memory_get_usage(true);
 
 echo "Time elapsed: " . ($end_time - $start_time) . " seconds" . PHP_EOL;
-echo "Memory usage: " . ($end_memory - $start_memory) . " bytes" . PHP_EOL;
+echo "Memory usage: " . memory_get_peak_usage(true) . " bytes\n";

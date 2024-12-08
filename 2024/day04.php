@@ -144,7 +144,6 @@ function validate_a_positions($grid, $a_positions): array
 
 // Main script
 $start_time = microtime(true);
-$start_memory = memory_get_usage(true);
 
 $input = file('input04.txt', FILE_IGNORE_NEW_LINES);
 
@@ -159,7 +158,6 @@ echo "Total occurrences of XMAS: $xmasOccurrences\n";
 echo "Total occurrences of X-MAS: " . count($valid_positions) . "\n";
 
 $end_time = microtime(true);
-$end_memory = memory_get_usage(true);
 
 echo "Time elapsed: " . ($end_time - $start_time) . " seconds\n";
-echo "Memory usage: " . ($end_memory - $start_memory) . " bytes\n";
+echo "Memory usage: " . memory_get_peak_usage(true) . " bytes\n";

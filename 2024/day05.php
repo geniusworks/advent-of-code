@@ -95,7 +95,6 @@ class UpdateValidator
 
 // Main script
 $start_time = microtime(true);
-$start_memory = memory_get_usage(true);
 
 // Read input
 $input = file('input05.txt', FILE_IGNORE_NEW_LINES);
@@ -117,7 +116,6 @@ echo "Sum of middle numbers for correctly ordered updates: $sumOfValidMiddles\n"
 echo "Sum of middle numbers for incorrectly ordered updates: $sumOfInvalidMiddles\n";
 
 $end_time = microtime(true);
-$end_memory = memory_get_usage(true);
 
 echo "Time elapsed: " . ($end_time - $start_time) . " seconds\n";
-echo "Memory usage: " . ($end_memory - $start_memory) . " bytes\n";
+echo "Memory usage: " . memory_get_peak_usage(true) . " bytes\n";

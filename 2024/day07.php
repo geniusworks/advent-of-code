@@ -146,10 +146,17 @@ $input = file_get_contents('input07.txt');
 $resultPart1 = solve($input);
 $resultPart2 = solvePart2($input);
 
-echo "Part 1: Calibration result = {$resultPart1['calibrationResult']}\n";
-echo "Execution time: {$resultPart1['executionTime']} seconds\n";
-echo "Memory usage: {$resultPart1['memoryUsage']} bytes\n";
+$start_time = microtime(true);
+$start_memory = memory_get_usage(true);
 
+$resultPart1 = solve($input);
+echo "Part 1: Calibration result = {$resultPart1['calibrationResult']}\n";
+echo "Execution time: " . ($resultPart1['executionTime']) . " seconds\n";
+echo "Memory usage: " . ($resultPart1['memoryUsage'] - $start_memory) . " bytes\n";
+
+$part1_memory = $resultPart1['memoryUsage'];
+
+$resultPart2 = solvePart2($input);
 echo "\nPart 2: Calibration result = {$resultPart2['calibrationResult']}\n";
-echo "Execution time: {$resultPart2['executionTime']} seconds\n";
-echo "Memory usage: {$resultPart2['memoryUsage']} bytes\n";
+echo "Execution time: " . ($resultPart2['executionTime']) . " seconds\n";
+echo "Memory usage: " . ($resultPart2['memoryUsage'] - $part1_memory) . " bytes\n";
