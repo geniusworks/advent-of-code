@@ -7,9 +7,9 @@
  * @link https://adventofcode.com/2024/day/3
  */
 
-$start_time = microtime(true);
+require_once '../bootstrap.php';
 
-$input = file('input03.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+$input = DataImporter::importFromFileWithDefaultFlags('input03.txt');
 
 function calculateResult($input, $part): float|int
 {
@@ -33,10 +33,22 @@ function calculateResult($input, $part): float|int
     return $result;
 }
 
-echo "Final result (Part 1): " . calculateResult($input, 1) . PHP_EOL;
-echo "Final result (Part 2): " . calculateResult($input, 2) . PHP_EOL;
+// Part 1
 
-$end_time = microtime(true);
+$profiler = new Profiler($profileName = 'Part 1');
+$profiler->startProfile();
 
-echo "Time elapsed: " . ($end_time - $start_time) . " seconds" . PHP_EOL;
-echo "Memory usage: " . memory_get_peak_usage(true) . " bytes\n";
+$sumOfMultiplications = calculateResult($input, 1);
+$profiler->stopProfile();
+echo "{$profileName} - Sum of multiplications: {$sumOfMultiplications}" . PHP_EOL;
+$profiler->reportProfile();
+
+// Part 1
+
+$profiler = new Profiler($profileName = 'Part 2');
+$profiler->startProfile();
+
+$sumOfEnabledMultiplications = calculateResult($input, 2);
+$profiler->stopProfile();
+echo "{$profileName} - Sum of multiplications: {$sumOfEnabledMultiplications}" . PHP_EOL;
+$profiler->reportProfile();

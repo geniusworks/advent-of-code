@@ -7,9 +7,14 @@
  * @link https://adventofcode.com/2024/day/1
  */
 
-$start_time = microtime(true);
+require_once '../bootstrap.php';
 
-$input = file('input01.txt', FILE_IGNORE_NEW_LINES);
+$input = DataImporter::importFromFileWithDefaultFlags('input01.txt');
+
+// Part 1
+
+$profiler = new Profiler('Part 1');
+$profiler->startProfile();
 
 $leftList = [];
 $rightList = [];
@@ -27,16 +32,20 @@ $totalDistance = array_sum(array_map(function ($left, $right) {
     return abs($left - $right);
 }, $leftList, $rightList));
 
-echo "Total Distance: $totalDistance" . PHP_EOL;
+$profiler->stopProfile();
+echo "Total Distance: {$totalDistance}" . PHP_EOL;
+$profiler->reportProfile();
+
+// Part 2
+
+$profiler = new Profiler('Part 2');
+$profiler->startProfile();
 
 $similarityScore = 0;
 foreach ($leftList as $left) {
     $similarityScore += $left * count(array_keys($rightList, $left));
 }
 
-echo "Similarity Score: $similarityScore" . PHP_EOL;
-
-$end_time = microtime(true);
-
-echo "Time elapsed: " . ($end_time - $start_time) . " seconds" . PHP_EOL;
-echo "Memory usage: " . memory_get_peak_usage(true) . " bytes\n";
+$profiler->stopProfile();
+echo "Similarity Score: {$similarityScore}" . PHP_EOL;
+$profiler->reportProfile();

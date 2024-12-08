@@ -7,6 +7,12 @@
  * @link https://adventofcode.com/2024/day/8
  */
 
+const DATA_INPUT_FILE = 'input08.txt';
+
+require_once __DIR__ . '/../' . 'bootstrap.php';
+
+$input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
+
 class Antenna
 {
     public $x;
@@ -20,6 +26,8 @@ class Antenna
         $this->frequency = $frequency;
     }
 }
+
+// Functions
 
 function markAntinode(&$map, $x, $y, &$antinodes): void
 {
@@ -104,8 +112,6 @@ function getGreatestCommonDivisor($a, $b)
     }
 }
 
-$input = file('input08.txt', FILE_IGNORE_NEW_LINES);
-
 $antennas = [];
 foreach ($input as $y => $row) {
     foreach (str_split($row) as $x => $cell) {
@@ -115,22 +121,20 @@ foreach ($input as $y => $row) {
     }
 }
 
-$start_time = microtime(true);
-$start_memory = memory_get_usage(true);
+// Part 1
 
-$resultPart1 = solve($input);
-echo "Part 1: Calibration result = {$resultPart1['calibrationResult']}\n";
-echo "Execution time: " . ($resultPart1['executionTime']) . " seconds\n";
-echo "Memory usage: " . ($resultPart1['memoryUsage'] - $start_memory) . " bytes\n";
+$profiler = new Profiler('Part 1');
+$profiler->startProfile();
+$resultPart1 = calculateImpact($input, $antennas);
+$profiler->stopProfile();
+echo "Calibration result = {$resultPart1}" . PHP_EOL;
+$profiler->reportProfile();
 
-$part1_peak_memory = memory_get_peak_usage(true);
+// Part 2
 
-$resultPart2 = solvePart2($input);
-echo "\nPart 2: Calibration result = {$resultPart2['calibrationResult']}\n";
-echo "Execution time: " . ($resultPart2['executionTime']) . " seconds\n";
-echo "Memory usage: " . (memory_get_peak_usage(true) - $part1_peak_memory) . " bytes\n";
-
-$end_time = microtime(true);
-$end_memory = memory_get_usage(true);
-echo "\nTotal execution time: " . ($end_time - $start_time) . " seconds\n";
-echo "Total memory usage: " . ($end_memory - $start_memory) . " bytes\n";
+$profiler = new Profiler('Part 2');
+$profiler->startProfile();
+$resultPart2 = calculateImpact2($input, $antennas);
+$profiler->stopProfile();
+echo "Calibration result = {$resultPart2}" . PHP_EOL;
+$profiler->reportProfile();

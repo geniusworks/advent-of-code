@@ -7,6 +7,10 @@
  * @link https://adventofcode.com/2024/day/6
  */
 
+require_once '../bootstrap.php';
+
+$input = DataImporter::importFromFileWithDefaultFlags('input06.txt');
+
 class GuardMovementSimulator
 {
     private const array DIRECTIONS = [
@@ -93,17 +97,38 @@ class GuardMovementSimulator
             }
         }
     }
-}
 
-// Main script
-$input = file('input06.txt', FILE_IGNORE_NEW_LINES);
+    public function simulatePart1(): int
+    {
+        return $this->run($this->grid, $this->startPosition)[0];
+    }
+
+    public function simulatePart2(): int
+    {
+        return $this->run($this->grid, $this->startPosition)[1];
+    }
+}
 
 try {
     $simulator = new GuardMovementSimulator($input);
-    $result = $simulator->simulate();
 
-    echo "Distinct map positions occupied (Part 1): " . $result[0] . PHP_EOL;
-    echo "Distinct obstruction positions to force loop (Part 2): " . $result[1] . PHP_EOL;
+    // Part 1
+
+    $profiler = new Profiler('Part 1');
+    $profiler->startProfile();
+    $part1Result = $simulator->simulatePart1();
+    $profiler->stopProfile();
+    echo "Distinct map positions occupied: $part1Result" . PHP_EOL;
+    $profiler->reportProfile();
+
+    // Part 2
+
+    $profiler = new Profiler('Part 2');
+    $profiler->startProfile();
+    $part2Result = $simulator->simulatePart2();
+    $profiler->stopProfile();
+    echo "Distinct obstruction positions to force loop: $part2Result" . PHP_EOL;
+    $profiler->reportProfile();
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . PHP_EOL;
 }

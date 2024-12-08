@@ -7,6 +7,10 @@
  * @link https://adventofcode.com/2024/day/4
  */
 
+require_once '../bootstrap.php';
+
+$input = DataImporter::importFromFileWithDefaultFlags('input04.txt');
+
 function find_xmas_occurrences($input): int
 {
     $xmasOccurrences = 0;
@@ -142,22 +146,25 @@ function validate_a_positions($grid, $a_positions): array
     return $valid_positions;
 }
 
-// Main script
-$start_time = microtime(true);
-
-$input = file('input04.txt', FILE_IGNORE_NEW_LINES);
-
 // Part 1
+
+$profiler = new Profiler('Part 1');
+$profiler->startProfile();
+
 $xmasOccurrences = find_xmas_occurrences($input);
 
+$profiler->stopProfile();
+echo "Total occurrences of XMAS: {$xmasOccurrences}" . PHP_EOL;
+$profiler->reportProfile();
+
 // Part 2
+
+$profiler = new Profiler('Part 2');
+$profiler->startProfile();
+
 $a_positions = find_a_positions($input);
-$valid_positions = validate_a_positions($input, $a_positions);
+$xmasCrisscrossedOccurrences = count(validate_a_positions($input, $a_positions));
 
-echo "Total occurrences of XMAS: $xmasOccurrences\n";
-echo "Total occurrences of X-MAS: " . count($valid_positions) . "\n";
-
-$end_time = microtime(true);
-
-echo "Time elapsed: " . ($end_time - $start_time) . " seconds\n";
-echo "Memory usage: " . memory_get_peak_usage(true) . " bytes\n";
+$profiler->stopProfile();
+echo "Total occurrences of X-MAS: {$xmasCrisscrossedOccurrences}" . PHP_EOL;
+$profiler->reportProfile();

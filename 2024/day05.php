@@ -7,6 +7,10 @@
  * @link https://adventofcode.com/2024/day/5
  */
 
+require_once '../bootstrap.php';
+
+$input = DataImporter::importFromFileWithDefaultFlags('input05.txt');
+
 class UpdateValidator
 {
     private array $rules;
@@ -93,29 +97,32 @@ class UpdateValidator
     }
 }
 
-// Main script
-$start_time = microtime(true);
-
-// Read input
-$input = file('input05.txt', FILE_IGNORE_NEW_LINES);
-
 // Create validator
 $validator = new UpdateValidator($input);
+
+// Part 1
+
+$profiler = new Profiler('Part 1');
+$profiler->startProfile();
 
 // Part 1: Correctly ordered updates
 $validUpdates = $validator->validateUpdates();
 $sumOfValidMiddles = $validator->getMiddleNumbers($validUpdates);
+
+$profiler->stopProfile();
+echo "Sum of middle numbers for correctly ordered updates: $sumOfValidMiddles" . PHP_EOL;
+$profiler->reportProfile();
+
+// Part 2
+
+$profiler = new Profiler('Part 2');
+$profiler->startProfile();
 
 // Part 2: Reordered invalid updates
 $invalidUpdates = $validator->getInvalidUpdates();
 $sortedInvalidUpdates = $validator->sortInvalidUpdates($invalidUpdates);
 $sumOfInvalidMiddles = $validator->getMiddleNumbers($sortedInvalidUpdates);
 
-// Output results
-echo "Sum of middle numbers for correctly ordered updates: $sumOfValidMiddles\n";
-echo "Sum of middle numbers for incorrectly ordered updates: $sumOfInvalidMiddles\n";
-
-$end_time = microtime(true);
-
-echo "Time elapsed: " . ($end_time - $start_time) . " seconds\n";
-echo "Memory usage: " . memory_get_peak_usage(true) . " bytes\n";
+$profiler->stopProfile();
+echo "Sum of middle numbers for correctly ordered updates: $sumOfInvalidMiddles" . PHP_EOL;
+$profiler->reportProfile();
