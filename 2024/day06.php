@@ -118,7 +118,7 @@ try {
     $profiler->startProfile();
     $part1Result = $simulator->simulatePart1();
     $profiler->stopProfile();
-    echo "Distinct map positions occupied: $part1Result" . PHP_EOL;
+    echo "Distinct map positions occupied: {$part1Result}" . PHP_EOL;
     $profiler->reportProfile();
 
     // Part 2
@@ -127,7 +127,7 @@ try {
     $profiler->startProfile();
     $part2Result = $simulator->simulatePart2();
     $profiler->stopProfile();
-    echo "Distinct obstruction positions to force loop: $part2Result" . PHP_EOL;
+    echo "Distinct obstruction positions to force loop: {$part2Result}" . PHP_EOL;
     $profiler->reportProfile();
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . PHP_EOL;

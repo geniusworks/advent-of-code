@@ -110,7 +110,7 @@ $validUpdates = $validator->validateUpdates();
 $sumOfValidMiddles = $validator->getMiddleNumbers($validUpdates);
 
 $profiler->stopProfile();
-echo "Sum of middle numbers for correctly ordered updates: $sumOfValidMiddles" . PHP_EOL;
+echo "Sum of middle numbers for correctly ordered updates: {$sumOfValidMiddles}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 2
@@ -124,5 +124,5 @@ $sortedInvalidUpdates = $validator->sortInvalidUpdates($invalidUpdates);
 $sumOfInvalidMiddles = $validator->getMiddleNumbers($sortedInvalidUpdates);
 
 $profiler->stopProfile();
-echo "Sum of middle numbers for correctly ordered updates: $sumOfInvalidMiddles" . PHP_EOL;
+echo "Sum of middle numbers for correctly ordered updates: {$sumOfInvalidMiddles}" . PHP_EOL;
 $profiler->reportProfile();
