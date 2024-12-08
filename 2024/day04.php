@@ -1,7 +1,11 @@
 <?php
-
-// Advent of Code 2024 Day 4
-// Martin Diekhoff
+/**
+ * Advent of Code 2024
+ * Day 4: Ceres Search
+ *
+ * @author Martin Diekhoff
+ * @link https://adventofcode.com/2024/day/4
+ */
 
 function find_xmas_occurrences($input): int
 {

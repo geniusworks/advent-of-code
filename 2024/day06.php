@@ -1,7 +1,11 @@
 <?php
-
-// Advent of Code 2024 Day 6
-// Martin Diekhoff
+/**
+ * Advent of Code 2024
+ * Day 6: Guard Gallivant
+ *
+ * @author Martin Diekhoff
+ * @link https://adventofcode.com/2024/day/6
+ */
 
 class GuardMovementSimulator
 {

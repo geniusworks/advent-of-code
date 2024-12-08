@@ -1,7 +1,11 @@
 <?php
-
-// Advent of Code 2024 Day 5
-// Martin Diekhoff
+/**
+ * Advent of Code 2024
+ * Day 5: Print Queue
+ *
+ * @author Martin Diekhoff
+ * @link https://adventofcode.com/2024/day/5
+ */
 
 class UpdateValidator
 {

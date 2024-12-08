@@ -1,7 +1,11 @@
 <?php
-
-// Advent of Code 2024 Day 1
-// Martin Diekhoff
+/**
+ * Advent of Code 2024
+ * Day 1: Historian Hysteria
+ *
+ * @author Martin Diekhoff
+ * @link https://adventofcode.com/2024/day/1
+ */
 
 $start_time = microtime(true);
 $start_memory = memory_get_usage(true);

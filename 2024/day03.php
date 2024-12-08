@@ -1,7 +1,11 @@
 <?php
-
-// Advent of Code 2024 Day 3
-// Martin Diekhoff
+/**
+ * Advent of Code 2024
+ * Day 3: Mull It Over
+ *
+ * @author Martin Diekhoff
+ * @link https://adventofcode.com/2024/day/3
+ */
 
 $start_time = microtime(true);
 $start_memory = memory_get_usage(true);

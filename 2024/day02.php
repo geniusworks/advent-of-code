@@ -1,7 +1,11 @@
 <?php
-
-// Advent of Code 2024 Day 2
-// Martin Diekhoff
+/**
+ * Advent of Code 2024
+ * Day 2: Red-Nosed Reports
+ *
+ * @author Martin Diekhoff
+ * @link https://adventofcode.com/2024/day/2
+ */
 
 $start_time = microtime(true);
 $start_memory = memory_get_usage(true);

@@ -1,7 +1,11 @@
 <?php
-
-// Advent of Code 2024 Day 7
-// Martin Diekhoff
+/**
+ * Advent of Code 2024
+ * Day 7: Bridge Repair
+ *
+ * @author Martin Diekhoff
+ * @link https://adventofcode.com/2024/day/7
+ */
 
 function parseEquations($input): array
 {
