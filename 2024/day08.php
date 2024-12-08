@@ -21,6 +21,16 @@ class Antenna
     }
 }
 
+function markAntinode(&$map, $x, $y, &$antinodes): void
+{
+    if ($x >= 0 && $x < strlen($map[0]) && $y >= 0 && $y < count($map)) {
+        if (!isset($antinodes["$x,$y"])) {
+            $antinodes["$x,$y"] = true;
+            $map[$y] = substr_replace($map[$y], '#', $x, 1);
+        }
+    }
+}
+
 function calculateImpact($input): int
 {
     $start = microtime(true);
@@ -52,27 +62,10 @@ function calculateImpact($input): int
                 $antinode2X = $antenna2->x + $dx;
                 $antinode2Y = $antenna2->y + $dy;
 
-                // Check if the antinodes are within the bounds of the map
-                if ($antinode1X >= 0 && $antinode1X < strlen($input[0]) && $antinode1Y >= 0 && $antinode1Y < count($input)) {
-                    if (!isset($antinodes["$antinode1X,$antinode1Y"])) {
-                        $antinodes["$antinode1X,$antinode1Y"] = true;
-                        $map[$antinode1Y] = substr_replace($map[$antinode1Y], '#', $antinode1X, 1);
-                    }
-                }
-
-                if ($antinode2X >= 0 && $antinode2X < strlen($input[0]) && $antinode2Y >= 0 && $antinode2Y < count($input)) {
-                    if (!isset($antinodes["$antinode2X,$antinode2Y"])) {
-                        $antinodes["$antinode2X,$antinode2Y"] = true;
-                        $map[$antinode2Y] = substr_replace($map[$antinode2Y], '#', $antinode2X, 1);
-                    }
-                }
+                markAntinode($map, $antinode1X, $antinode1Y, $antinodes);
+                markAntinode($map, $antinode2X, $antinode2Y, $antinodes);
             }
         }
-    }
-
-    // Output the map with antinodes marked
-    foreach ($map as $row) {
-        echo $row . "\n";
     }
 
     // Count the unique locations with antinodes
@@ -86,7 +79,7 @@ function calculateImpact($input): int
 
     echo "Time: " . ($end - $start) . " seconds\n";
     echo "Memory: $memory bytes\n";
-    echo "Result: $count\n";
+    echo "Number of unique antinodes: $count\n";
 
     return $count;
 }
