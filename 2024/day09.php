@@ -16,40 +16,44 @@ $input = DataImporter::importFromFileContents(__DIR__ . '/' . DATA_INPUT_FILE);
 function compactDiskPart1($diskMap): float|int
 {
     $blocks = [];
-    $fileId = 0;
+    $fileIndex = 0;
+    $blockIndex = 0;
     $i = 0;
+
+    // Process disk map
     while ($i < strlen($diskMap)) {
-        if ($i + 1 >= strlen($diskMap)) {
-            $fileLength = (int)$diskMap[$i];
+        [$fileLength, $freeSpaceLength] = processDiskMapEntry($diskMap, $i);
+        $i += 2;
+
+        // Add file blocks
+        if ($fileLength > 0) {
             for ($j = 0; $j < $fileLength; $j++) {
-                $blocks[] = $fileId;
+                $blocks[$blockIndex] = $fileIndex;
+                $blockIndex++;
             }
-            break;
         }
-
-        $fileLength = (int)$diskMap[$i];
-        $freeSpaceLength = (int)$diskMap[$i + 1];
-
-        // Add file blocks for current file ID
-        for ($j = 0; $j < $fileLength; $j++) {
-            $blocks[] = $fileId;
-        }
+        $fileIndex++;
 
         // Add free space blocks
-        for ($j = 0; $j < $freeSpaceLength; $j++) {
-            $blocks[] = '.';
+        if ($freeSpaceLength > 0) {
+            for ($j = 0; $j < $freeSpaceLength; $j++) {
+                $blocks[$blockIndex] = '.';
+                $blockIndex++;
+            }
         }
-
-        $fileId++;
-        $i += 2;
     }
 
     // Compact files
-    $last_update_time = microtime(true);
-    $block_count = count($blocks);
-    $last_free_space = 0;
+    $blocks = compactFilesPart1($blocks);
 
-    for ($i = $block_count - 1; $i >= 0; $i--) {
+    // Calculate filesystem checksum
+    return calculateChecksum($blocks);
+}
+
+function compactFilesPart1($blocks): array
+{
+    $last_free_space = 0;
+    for ($i = count($blocks) - 1; $i >= 0; $i--) {
         $block = $blocks[$i];
         if ($block !== '.') {
             // Find a free space to move the block to
@@ -63,17 +67,13 @@ function compactDiskPart1($diskMap): float|int
                 }
             }
         }
-
-        $progress = ($block_count - $i) / $block_count * 100;
-        $current_time = microtime(true);
-
-        if ($current_time - $last_update_time >= 1) {
-            echo "Progress: " . intval($progress) . "%\n";
-            $last_update_time = $current_time;
-        }
     }
 
-    // Calculate filesystem checksum
+    return $blocks;
+}
+
+function calculateChecksumPart1($blocks): float|int
+{
     $checksum = 0;
     foreach ($blocks as $index => $block) {
         if ($block !== '.') {
@@ -103,35 +103,44 @@ function compactDiskPart2($diskMap): float|int
     $files = [];
     $free = [];
     $i = 0;
+
+    // Process disk map
     while ($i < strlen($diskMap)) {
-        if ($i + 1 >= strlen($diskMap)) {
-            $fileLength = (int)$diskMap[$i];
-            $files[$blockIndex] = array_fill(0, $fileLength, $fileIndex);
-            break;
-        }
+        [$fileLength, $freeSpaceLength] = processDiskMapEntry($diskMap, $i);
+        $i += 2;
 
-        $fileLength = (int)$diskMap[$i];
-        $freeSpaceLength = (int)$diskMap[$i + 1];
-
+        // Add file blocks
         if ($fileLength > 0) {
             $files[$blockIndex] = array_fill(0, $fileLength, $fileIndex);
         }
         $blockIndex += $fileLength;
         $fileIndex++;
 
+        // Add free space blocks
         if ($freeSpaceLength > 0) {
             $free[$blockIndex] = array_fill(0, $freeSpaceLength, '.');
         }
         $blockIndex += $freeSpaceLength;
-
-        $i += 2;
     }
 
     // Compact files
-    $last_update_time = microtime(true);
-    $files_count = count($files);
-    $files_counter = 0;
+    $blocks = compactFilesPart2($files, $free);
 
+    // Calculate filesystem checksum
+    return calculateChecksum($blocks);
+}
+
+function processDiskMapEntry($diskMap, $i): array
+{
+    if ($i + 1 >= strlen($diskMap)) {
+        return [(int)$diskMap[$i], 0];
+    }
+
+    return [(int)$diskMap[$i], (int)$diskMap[$i + 1]];
+}
+
+function compactFilesPart2($files, $free): array
+{
     foreach (array_reverse($files, true) as $fileKey => $file) {
         $fileLength = count($file);
         foreach ($free as $freeKey => $freeBlock) {
@@ -154,24 +163,16 @@ function compactDiskPart2($diskMap): float|int
                 break;
             }
         }
-
-        $current_time = microtime(true);
-
-        if ($current_time - $last_update_time >= 1) {
-            $progress = ($files_count - $files_counter) / $files_count * 100;
-            echo "Progress: " . intval($progress) . "%\n";
-            $last_update_time = $current_time;
-        }
-
-        $files_counter++;
     }
 
     // Reconstitute blocks
     $blocks = $free + $files;
     ksort($blocks);
-    $blocks = array_merge(...$blocks);
+    return array_merge(...$blocks);
+}
 
-    // Calculate filesystem checksum
+function calculateChecksum($blocks): float|int
+{
     $checksum = 0;
     foreach ($blocks as $index => $block) {
         if ($block !== '.') {
