@@ -45,16 +45,31 @@ function compactDiskPart1($diskMap): float|int
     }
 
     // Compact files
-    for ($i = count($blocks) - 1; $i >= 0; $i--) {
+    $last_update_time = microtime(true);
+    $block_count = count($blocks);
+    $last_free_space = 0;
+
+    for ($i = $block_count - 1; $i >= 0; $i--) {
         $block = $blocks[$i];
         if ($block !== '.') {
-            for ($j = 0; $j < $i; $j++) {
+            // Find a free space to move the block to
+            for ($j = $last_free_space; $j < $i; $j++) {
                 if ($blocks[$j] === '.') {
+                    // Move the block to the free space
                     $blocks[$j] = $block;
                     $blocks[$i] = '.';
+                    $last_free_space = $j;
                     break;
                 }
             }
+        }
+
+        $progress = ($block_count - $i) / $block_count * 100;
+        $current_time = microtime(true);
+
+        if ($current_time - $last_update_time >= 1) {
+            echo "Progress: " . intval($progress) . "%\n";
+            $last_update_time = $current_time;
         }
     }
 
@@ -67,6 +82,18 @@ function compactDiskPart1($diskMap): float|int
     }
 
     return $checksum;
+}
+
+function insertIntoSortedNumericArray(&$array, $key, $value): void
+{
+    $pos = 0;
+    foreach ($array as $k => $_) {
+        if ($k > $key) {
+            break;
+        }
+        $pos++;
+    }
+    $array = array_slice($array, 0, $pos, true) + [$key => $value] + array_slice($array, $pos, null, true);
 }
 
 function compactDiskPart2($diskMap): float|int
@@ -100,41 +127,43 @@ function compactDiskPart2($diskMap): float|int
         $i += 2;
     }
 
-    $output = $free + $files;
-    ksort($output);
-    // $mergedArray = array_merge(...$output);
-    // echo 'File block (n): ' . implode('', $mergedArray) . PHP_EOL;
+    // Compact files
+    $last_update_time = microtime(true);
+    $files_count = count($files);
+    $files_counter = 0;
 
     foreach (array_reverse($files, true) as $fileKey => $file) {
         $fileLength = count($file);
-        $foundMatch = false;
         foreach ($free as $freeKey => $freeBlock) {
             if ($freeKey > $fileKey) {
                 break;
             }
             $freeLength = count($freeBlock);
             if ($freeLength >= $fileLength) {
-                $foundMatch = true;
                 unset($files[$fileKey]);
                 $files[$freeKey] = $file;
                 unset($free[$freeKey]);
                 $free[$fileKey] = array_fill(0, $fileLength, '.');
                 if ($freeLength > $fileLength) {
-                    $free[$freeKey + $fileLength] = array_fill(0, ($freeLength - $fileLength), '.');
-                    ksort($free);
+                    insertIntoSortedNumericArray(
+                        $free,
+                        $freeKey + $fileLength,
+                        array_fill(0, ($freeLength - $fileLength), '.'),
+                    );
                 }
                 break;
             }
         }
-        if ($foundMatch) {
-            $output = $free + $files;
-            ksort($output);
-            $mergedArray = [];
-            foreach ($output as $value) {
-                $mergedArray = array_merge($mergedArray, is_array($value) ? $value : [$value]);
-            }
-            // echo "File block ({$file[0]}): " . implode('', array_map(function($x) { return ($x == '.') ? '.' : $x; }, $mergedArray)) . PHP_EOL;
+
+        $current_time = microtime(true);
+
+        if ($current_time - $last_update_time >= 1) {
+            $progress = ($files_count - $files_counter) / $files_count * 100;
+            echo "Progress: " . intval($progress) . "%\n";
+            $last_update_time = $current_time;
         }
+
+        $files_counter++;
     }
 
     // Reconstitute blocks
@@ -164,10 +193,9 @@ $profiler->reportProfile();
 
 // Part 2
 
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler('Part 2');
 $profiler->startProfile();
 $result1 = compactDiskPart2($input);
 $profiler->stopProfile();
-echo "Disk blocks checksum (whole files): {$result1}" . PHP_EOL;
+echo PHP_EOL . "Disk blocks checksum (whole files): {$result1}" . PHP_EOL;
 $profiler->reportProfile();
-
