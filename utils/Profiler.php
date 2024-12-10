@@ -56,6 +56,7 @@ class Profiler
     public function reportProfile(): void
     {
         $profile = $this->stopProfile();
+        echo PHP_EOL;
         echo "Profile Name: {$this->profileName}" . PHP_EOL;
         echo "Execution Time: " . ($profile['endTime'] - $profile['startTime']) . " seconds" . PHP_EOL;
         echo "Initial Memory Usage: " . $profile['initialMemory'] . " bytes" . PHP_EOL;

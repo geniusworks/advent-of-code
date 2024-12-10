@@ -36,7 +36,7 @@ require_once __DIR__ . '/../' . 'bootstrap.php';
 
 \$input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
 
-// ...
+// Solution code follows here...
 
 // Part 1
 
