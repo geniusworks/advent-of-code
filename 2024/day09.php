@@ -14,15 +14,15 @@ require_once __DIR__ . '/../' . 'bootstrap.php';
 $input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
 
 // Split each row into an array of columns
-$input = array_map(function($row) {
+$input = array_map(function ($row) {
     return array_map('intval', str_split($row));
 }, $input);
 
 // Define the possible movements (up, down, left, right)
-$moves = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+const MOVES = [[0, 1], [0, -1], [1, 0], [-1, 0]];
 
 // Function to calculate the score for a trailhead
-function calculateScore($map, $x, $y, $moves): int
+function calculateScore($map, $x, $y)
 {
     $score = 0;
     $stack = [[$x, $y]];
@@ -40,7 +40,7 @@ function calculateScore($map, $x, $y, $moves): int
         }
 
         // Explore neighboring positions
-        foreach ($moves as $move) {
+        foreach (MOVES as $move) {
             $nx = $cx + $move[0];
             $ny = $cy + $move[1];
             if (isset($map[$ny][$nx]) && $map[$ny][$nx] == $map[$cy][$cx] + 1) {
@@ -53,20 +53,20 @@ function calculateScore($map, $x, $y, $moves): int
 
 function Part1($input): int
 {
-    $totalScore = 0;
+    $totalTrailheadScore = 0;
     foreach ($input as $y => $row) {
         foreach ($row as $x => $height) {
             if ($height == 0) {
-                $totalScore += calculateScore($input, $x, $y, $moves);
+                $totalTrailheadScore += calculateScore($input, $x, $y);
             }
         }
     }
-    return $totalScore;
+    return $totalTrailheadScore;
 }
 
 function Part2($input): int
 {
-    $totalRating = 0;
+    $totalTrailheadRating = 0;
     $trailheads = [];
     $trailEnds = [];
 
@@ -98,7 +98,7 @@ function Part2($input): int
                 }
 
                 // Explore neighboring positions
-                foreach ($moves as $move) {
+                foreach (MOVES as $move) {
                     $nx = $cx + $move[0];
                     $ny = $cy + $move[1];
                     if (isset($input[$ny][$nx]) && $input[$ny][$nx] == $input[$cy][$cx] + 1) {
@@ -110,9 +110,9 @@ function Part2($input): int
             }
             $rating += count($paths);
         }
-        $totalRating += $rating;
+        $totalTrailheadRating += $rating;
     }
-    return $totalRating;
+    return $totalTrailheadRating;
 }
 
 // Part 1
