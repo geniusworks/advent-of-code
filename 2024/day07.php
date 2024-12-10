@@ -67,9 +67,8 @@ function cartesianProduct($arrays): array
     return $result;
 }
 
-function solve($input): array
+function solvePart1($input): int
 {
-    $startTime = microtime(true);
     $equations = parseEquations($input);
     $calibrationResult = 0;
     foreach ($equations as [$testValue, $numbers]) {
@@ -77,59 +76,66 @@ function solve($input): array
             $calibrationResult += $testValue;
         }
     }
-    $endTime = microtime(true);
-    $memoryUsage = memory_get_usage(true);
-    return [
-        'calibrationResult' => $calibrationResult,
-        'executionTime' => $endTime - $startTime,
-        'memoryUsage' => $memoryUsage,
-    ];
-}
-
-function evaluateEquationPart2($numbers, $operators): int
-{
-    $result = $numbers[0];
-    for ($i = 1; $i < count($numbers); $i++) {
-        if ($operators[$i - 1] === '+') {
-            $result += $numbers[$i];
-        } elseif ($operators[$i - 1] === '*') {
-            $result *= $numbers[$i];
-        } elseif ($operators[$i - 1] === '||') {
-            $result = (int)($result . $numbers[$i]);
-        }
-    }
-    return $result;
+    return $calibrationResult;
 }
 
 function isValidEquationPart2($testValue, $numbers): bool
 {
     $operators = ['+', '*', '||'];
-    $isValid = false;
-    generateCombinations($numbers, $operators, 0, [], $testValue, $isValid);
-    return $isValid;
-}
+    $n = count($numbers);
 
-function generateCombinations($numbers, $operators, $index, $currentOperators, $testValue, &$isValid): void
-{
-    if ($index === count($numbers) - 1) {
-        $result = evaluateEquationPart2($numbers, $currentOperators);
-        if ($result == $testValue) {
-            $isValid = true;
-        }
-    } else {
-        foreach ($operators as $operator) {
-            $newOperators = array_merge($currentOperators, [$operator]);
-            generateCombinations($numbers, $operators, $index + 1, $newOperators, $testValue, $isValid);
-            if ($isValid) {
-                break;
+    $stack = [[$numbers[0]]];
+    for ($i = 1; $i < $n; $i++) {
+        $newStack = [];
+        foreach ($stack as $expression) {
+            foreach ($operators as $op) {
+                $newExpression = [];
+                foreach ($expression as $j => $value) {
+                    if ($j < count($expression) - 1) {
+                        $newExpression[] = $value;
+                    } else {
+                        $newExpression[] = evaluate($value, $op, $numbers[$i]);
+                    }
+                }
+                $newStack[] = $newExpression;
             }
         }
+        $stack = $newStack;
+    }
+
+    $results = [];
+    foreach ($stack as $expression) {
+        $result = $expression[0];
+        foreach ($expression as $j => $value) {
+            if ($j > 0) {
+                $result = evaluate($result, '+', $value);
+            }
+        }
+        $results[] = $result;
+    }
+
+    return in_array($testValue, $results);
+}
+
+function evaluate($left, $op, $right): float|false|int
+{
+    $left = (int)$left;
+    $right = (int)$right;
+
+    switch ($op) {
+        case '+':
+            return $left + $right;
+        case '*':
+            return $left * $right;
+        case '||':
+            return (int)($left . $right);
+        default:
+            return false;
     }
 }
 
-function solvePart2($input): array
+function solvePart2($input): int
 {
-    $startTime = microtime(true);
     $equations = parseEquations($input);
     $calibrationResult = 0;
     foreach ($equations as [$testValue, $numbers]) {
@@ -137,22 +143,16 @@ function solvePart2($input): array
             $calibrationResult += $testValue;
         }
     }
-    $endTime = microtime(true);
-    $memoryUsage = memory_get_usage(true);
-    return [
-        'calibrationResult' => $calibrationResult,
-        'executionTime' => $endTime - $startTime,
-        'memoryUsage' => $memoryUsage,
-    ];
+    return $calibrationResult;
 }
 
 // Part 1
 
 $profiler = new Profiler('Part 1');
 $profiler->startProfile();
-$resultPart1 = solve($input);
+$resultPart1 = solvePart1($input);
 $profiler->stopProfile();
-echo "Calibration result: {$resultPart1['calibrationResult']}" . PHP_EOL;
+echo "Calibration result: {$resultPart1}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 2
@@ -161,5 +161,5 @@ $profiler = new Profiler('Part 2');
 $profiler->startProfile();
 $resultPart2 = solvePart2($input);
 $profiler->stopProfile();
-echo "Calibration result: {$resultPart2['calibrationResult']}" . PHP_EOL;
+echo "Calibration result: {$resultPart2}" . PHP_EOL;
 $profiler->reportProfile();
