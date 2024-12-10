@@ -18,13 +18,11 @@ $input = array_map(function ($row) {
     return array_map('intval', str_split($row));
 }, $input);
 
-// Solution code follows here...
-
 // Define the possible movements (up, down, left, right)
-$moves = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+const MOVES = [[0, 1], [0, -1], [1, 0], [-1, 0]];
 
 // Function to calculate the score for a trailhead
-function calculateScore($map, $x, $y, $moves)
+function calculateScore($map, $x, $y): int
 {
     $score = 0;
     $stack = [[$x, $y]];
@@ -42,7 +40,7 @@ function calculateScore($map, $x, $y, $moves)
         }
 
         // Explore neighboring positions
-        foreach ($moves as $move) {
+        foreach (MOVES as $move) {
             $nx = $cx + $move[0];
             $ny = $cy + $move[1];
             if (isset($map[$ny][$nx]) && $map[$ny][$nx] == $map[$cy][$cx] + 1) {
@@ -53,74 +51,84 @@ function calculateScore($map, $x, $y, $moves)
     return $score;
 }
 
+function Part1($input): int
+{
+    $totalTrailheadScore = 0;
+    foreach ($input as $y => $row) {
+        foreach ($row as $x => $height) {
+            if ($height == 0) {
+                $totalTrailheadScore += calculateScore($input, $x, $y);
+            }
+        }
+    }
+    return $totalTrailheadScore;
+}
+
+function Part2($input): int
+{
+    $totalTrailheadRating = 0;
+    $trailheads = [];
+    $trailEnds = [];
+
+    // Find all trailheads (0) and trail ends (9)
+    foreach ($input as $y => $row) {
+        foreach ($row as $x => $height) {
+            if ($height == 0) {
+                $trailheads[] = [$x, $y];
+            } elseif ($height == 9) {
+                $trailEnds[] = [$x, $y];
+            }
+        }
+    }
+
+    // Discover all unique trails leading from each 0 to each connected/possible 9
+    foreach ($trailheads as $trailhead) {
+        $rating = 0;
+        foreach ($trailEnds as $trailEnd) {
+            $paths = [];
+            $stack = [[$trailhead]];
+            while ($stack) {
+                $path = array_pop($stack);
+                $cx = $path[count($path) - 1][0];
+                $cy = $path[count($path) - 1][1];
+
+                // Check if this position is the trail end
+                if ($trailEnd[0] == $cx && $trailEnd[1] == $cy) {
+                    $paths[] = $path;
+                }
+
+                // Explore neighboring positions
+                foreach (MOVES as $move) {
+                    $nx = $cx + $move[0];
+                    $ny = $cy + $move[1];
+                    if (isset($input[$ny][$nx]) && $input[$ny][$nx] == $input[$cy][$cx] + 1) {
+                        $newPath = $path;
+                        $newPath[] = [$nx, $ny];
+                        $stack[] = $newPath;
+                    }
+                }
+            }
+            $rating += count($paths);
+        }
+        $totalTrailheadRating += $rating;
+    }
+    return $totalTrailheadRating;
+}
+
 // Part 1
 
 $profiler = new Profiler('Part 1');
 $profiler->startProfile();
-$totalScore = 0;
-foreach ($input as $y => $row) {
-    foreach ($row as $x => $height) {
-        if ($height == 0) {
-            $totalScore += calculateScore($input, $x, $y, $moves);
-        }
-    }
-}
-$result1 = $totalScore;
+$result1 = Part1($input);
 $profiler->stopProfile();
-echo "Result = {$result1}" . PHP_EOL;
+echo "Sum of trailhead scores: {$result1}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 2
 
 $profiler = new Profiler('Part 2');
 $profiler->startProfile();
-$totalRating = 0;
-$trailheads = [];
-$trailEnds = [];
-
-// Find all trailheads (0) and trail ends (9)
-foreach ($input as $y => $row) {
-    foreach ($row as $x => $height) {
-        if ($height == 0) {
-            $trailheads[] = [$x, $y];
-        } elseif ($height == 9) {
-            $trailEnds[] = [$x, $y];
-        }
-    }
-}
-
-// Discover all unique trails leading from each 0 to each connected/possible 9
-foreach ($trailheads as $trailhead) {
-    $rating = 0;
-    foreach ($trailEnds as $trailEnd) {
-        $paths = [];
-        $stack = [[$trailhead]];
-        while ($stack) {
-            $path = array_pop($stack);
-            $cx = $path[count($path) - 1][0];
-            $cy = $path[count($path) - 1][1];
-
-            // Check if this position is the trail end
-            if ($trailEnd[0] == $cx && $trailEnd[1] == $cy) {
-                $paths[] = $path;
-            }
-
-            // Explore neighboring positions
-            foreach ($moves as $move) {
-                $nx = $cx + $move[0];
-                $ny = $cy + $move[1];
-                if (isset($input[$ny][$nx]) && $input[$ny][$nx] == $input[$cy][$cx] + 1) {
-                    $newPath = $path;
-                    $newPath[] = [$nx, $ny];
-                    $stack[] = $newPath;
-                }
-            }
-        }
-        $rating += count($paths);
-    }
-    $totalRating += $rating;
-}
-$result2 = $totalRating;
+$result2 = Part2($input);
 $profiler->stopProfile();
-echo "Result = {$result2}" . PHP_EOL;
+echo "Sum of trailhead ratings: {$result2}" . PHP_EOL;
 $profiler->reportProfile();

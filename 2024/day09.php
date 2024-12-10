@@ -1,134 +1,202 @@
 <?php
 /**
  * Advent of Code 2024
- * Day 10: Hoof It
+ * Day 9: Disk Fragmenter
  *
  * @author Martin Diekhoff
- * @link https://adventofcode.com/2024/day/10
+ * @link https://adventofcode.com/2024/day/9
  */
 
-const DATA_INPUT_FILE = 'input10.txt';
+const DATA_INPUT_FILE = 'input09.txt';
 
 require_once __DIR__ . '/../' . 'bootstrap.php';
 
-$input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
+$input = DataImporter::importFromFileContents(__DIR__ . '/' . DATA_INPUT_FILE);
 
-// Split each row into an array of columns
-$input = array_map(function ($row) {
-    return array_map('intval', str_split($row));
-}, $input);
-
-// Define the possible movements (up, down, left, right)
-const MOVES = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-
-// Function to calculate the score for a trailhead
-function calculateScore($map, $x, $y)
+function compactDiskPart1($diskMap): float|int
 {
-    $score = 0;
-    $stack = [[$x, $y]];
-    $visited = [];
-    while ($stack) {
-        [$cx, $cy] = array_pop($stack);
-        if (in_array([$cx, $cy], $visited)) {
-            continue;
-        }
-        $visited[] = [$cx, $cy];
+    $blocks = [];
+    $fileIndex = 0;
+    $blockIndex = 0;
+    $i = 0;
 
-        // Check if this position is a 9-height position
-        if ($map[$cy][$cx] == 9) {
-            $score++;
-        }
+    // Process disk map
+    while ($i < strlen($diskMap)) {
+        [$fileLength, $freeSpaceLength] = processDiskMapEntry($diskMap, $i);
+        $i += 2;
 
-        // Explore neighboring positions
-        foreach (MOVES as $move) {
-            $nx = $cx + $move[0];
-            $ny = $cy + $move[1];
-            if (isset($map[$ny][$nx]) && $map[$ny][$nx] == $map[$cy][$cx] + 1) {
-                $stack[] = [$nx, $ny];
+        // Add file blocks
+        if ($fileLength > 0) {
+            for ($j = 0; $j < $fileLength; $j++) {
+                $blocks[$blockIndex] = $fileIndex;
+                $blockIndex++;
+            }
+        }
+        $fileIndex++;
+
+        // Add free space blocks
+        if ($freeSpaceLength > 0) {
+            for ($j = 0; $j < $freeSpaceLength; $j++) {
+                $blocks[$blockIndex] = '.';
+                $blockIndex++;
             }
         }
     }
-    return $score;
+
+    // Compact files
+    $blocks = compactFilesPart1($blocks);
+
+    // Calculate filesystem checksum
+    return calculateChecksum($blocks);
 }
 
-function Part1($input): int
+function compactFilesPart1($blocks): array
 {
-    $totalTrailheadScore = 0;
-    foreach ($input as $y => $row) {
-        foreach ($row as $x => $height) {
-            if ($height == 0) {
-                $totalTrailheadScore += calculateScore($input, $x, $y);
+    $last_free_space = 0;
+    for ($i = count($blocks) - 1; $i >= 0; $i--) {
+        $block = $blocks[$i];
+        if ($block !== '.') {
+            // Find a free space to move the block to
+            for ($j = $last_free_space; $j < $i; $j++) {
+                if ($blocks[$j] === '.') {
+                    // Move the block to the free space
+                    $blocks[$j] = $block;
+                    $blocks[$i] = '.';
+                    $last_free_space = $j;
+                    break;
+                }
             }
         }
     }
-    return $totalTrailheadScore;
+
+    return $blocks;
 }
 
-function Part2($input): int
+function calculateChecksumPart1($blocks): float|int
 {
-    $totalTrailheadRating = 0;
-    $trailheads = [];
-    $trailEnds = [];
+    $checksum = 0;
+    foreach ($blocks as $index => $block) {
+        if ($block !== '.') {
+            $checksum += $index * $block;
+        }
+    }
 
-    // Find all trailheads (0) and trail ends (9)
-    foreach ($input as $y => $row) {
-        foreach ($row as $x => $height) {
-            if ($height == 0) {
-                $trailheads[] = [$x, $y];
-            } elseif ($height == 9) {
-                $trailEnds[] = [$x, $y];
+    return $checksum;
+}
+
+function insertIntoSortedNumericArray(&$array, $key, $value): void
+{
+    $pos = 0;
+    foreach ($array as $k => $_) {
+        if ($k > $key) {
+            break;
+        }
+        $pos++;
+    }
+    $array = array_slice($array, 0, $pos, true) + [$key => $value] + array_slice($array, $pos, null, true);
+}
+
+function compactDiskPart2($diskMap): float|int
+{
+    $fileIndex = 0;
+    $blockIndex = 0;
+    $files = [];
+    $free = [];
+    $i = 0;
+
+    // Process disk map
+    while ($i < strlen($diskMap)) {
+        [$fileLength, $freeSpaceLength] = processDiskMapEntry($diskMap, $i);
+        $i += 2;
+
+        // Add file blocks
+        if ($fileLength > 0) {
+            $files[$blockIndex] = array_fill(0, $fileLength, $fileIndex);
+        }
+        $blockIndex += $fileLength;
+        $fileIndex++;
+
+        // Add free space blocks
+        if ($freeSpaceLength > 0) {
+            $free[$blockIndex] = array_fill(0, $freeSpaceLength, '.');
+        }
+        $blockIndex += $freeSpaceLength;
+    }
+
+    // Compact files
+    $blocks = compactFilesPart2($files, $free);
+
+    // Calculate filesystem checksum
+    return calculateChecksum($blocks);
+}
+
+function processDiskMapEntry($diskMap, $i): array
+{
+    if ($i + 1 >= strlen($diskMap)) {
+        return [(int)$diskMap[$i], 0];
+    }
+
+    return [(int)$diskMap[$i], (int)$diskMap[$i + 1]];
+}
+
+function compactFilesPart2($files, $free): array
+{
+    foreach (array_reverse($files, true) as $fileKey => $file) {
+        $fileLength = count($file);
+        foreach ($free as $freeKey => $freeBlock) {
+            if ($freeKey > $fileKey) {
+                break;
+            }
+            $freeLength = count($freeBlock);
+            if ($freeLength >= $fileLength) {
+                unset($files[$fileKey]);
+                $files[$freeKey] = $file;
+                unset($free[$freeKey]);
+                $free[$fileKey] = array_fill(0, $fileLength, '.');
+                if ($freeLength > $fileLength) {
+                    insertIntoSortedNumericArray(
+                        $free,
+                        $freeKey + $fileLength,
+                        array_fill(0, ($freeLength - $fileLength), '.'),
+                    );
+                }
+                break;
             }
         }
     }
 
-    // Discover all unique trails leading from each 0 to each connected/possible 9
-    foreach ($trailheads as $trailhead) {
-        $rating = 0;
-        foreach ($trailEnds as $trailEnd) {
-            $paths = [];
-            $stack = [[$trailhead]];
-            while ($stack) {
-                $path = array_pop($stack);
-                $cx = $path[count($path) - 1][0];
-                $cy = $path[count($path) - 1][1];
+    // Reconstitute blocks
+    $blocks = $free + $files;
+    ksort($blocks);
+    return array_merge(...$blocks);
+}
 
-                // Check if this position is the trail end
-                if ($trailEnd[0] == $cx && $trailEnd[1] == $cy) {
-                    $paths[] = $path;
-                }
-
-                // Explore neighboring positions
-                foreach (MOVES as $move) {
-                    $nx = $cx + $move[0];
-                    $ny = $cy + $move[1];
-                    if (isset($input[$ny][$nx]) && $input[$ny][$nx] == $input[$cy][$cx] + 1) {
-                        $newPath = $path;
-                        $newPath[] = [$nx, $ny];
-                        $stack[] = $newPath;
-                    }
-                }
-            }
-            $rating += count($paths);
+function calculateChecksum($blocks): float|int
+{
+    $checksum = 0;
+    foreach ($blocks as $index => $block) {
+        if ($block !== '.') {
+            $checksum += $index * $block;
         }
-        $totalTrailheadRating += $rating;
     }
-    return $totalTrailheadRating;
+
+    return $checksum;
 }
 
 // Part 1
 
 $profiler = new Profiler('Part 1');
 $profiler->startProfile();
-$result1 = Part1($input);
+$result1 = compactDiskPart1($input);
 $profiler->stopProfile();
-echo "Sum of trailhead scores: {$result1}" . PHP_EOL;
+echo "Disk blocks checksum (file blocks): {$result1}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 2
 
 $profiler = new Profiler('Part 2');
 $profiler->startProfile();
-$result2 = Part2($input);
+$result1 = compactDiskPart2($input);
 $profiler->stopProfile();
-echo "Sum of trailhead ratings: {$result2}" . PHP_EOL;
+echo PHP_EOL . "Disk blocks checksum (whole files): {$result1}" . PHP_EOL;
 $profiler->reportProfile();
