@@ -23,19 +23,13 @@ class GuardMovementSimulator
     private array $grid;
     private array $startPosition;
 
-    /**
-     * @throws Exception
-     */
     public function __construct(array $grid)
     {
         $this->grid = $grid;
         $this->startPosition = $this->findStartPosition();
     }
 
-    /**
-     * @throws Exception
-     */
-    private function findStartPosition(): array
+    private function findStartPosition(): ?array
     {
         foreach ($this->grid as $r => $row) {
             $c = strpos($row, '^');
@@ -43,11 +37,15 @@ class GuardMovementSimulator
                 return [$r, $c];
             }
         }
-        throw new Exception("Start position not found");
+        return null;
     }
 
-    private function run(array $grid, array $start, bool $detectLoop = false, bool $countObstructions = false): array|int
-    {
+    private function run(
+        array $grid,
+        array $start,
+        bool $detectLoop = false,
+        bool $countObstructions = false,
+    ): array|int {
         [$r, $c] = $start;
         $dir = 0;
         $visited = [];
@@ -110,24 +108,24 @@ class GuardMovementSimulator
 
 try {
     $simulator = new GuardMovementSimulator($input);
-
-    // Part 1
-
-    $profiler = new Profiler();
-    $profiler->startProfile();
-    $part1Result = $simulator->simulatePart1();
-    $profiler->stopProfile();
-    echo "Distinct map positions occupied: {$part1Result}" . PHP_EOL;
-    $profiler->reportProfile();
-
-    // Part 2
-
-    $profiler = new Profiler();
-    $profiler->startProfile();
-    $part2Result = $simulator->simulatePart2();
-    $profiler->stopProfile();
-    echo "Distinct obstruction positions to force loop: {$part2Result}" . PHP_EOL;
-    $profiler->reportProfile();
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage() . PHP_EOL;
+    echo $e->getMessage() . PHP_EOL;
 }
+
+// Part 1
+
+$profiler = new Profiler();
+$profiler->startProfile();
+$part1Result = $simulator->simulatePart1();
+$profiler->stopProfile();
+echo "Distinct map positions occupied: {$part1Result}" . PHP_EOL;
+$profiler->reportProfile();
+
+// Part 2
+
+$profiler = new Profiler();
+$profiler->startProfile();
+$part2Result = $simulator->simulatePart2();
+$profiler->stopProfile();
+echo "Distinct obstruction positions to force loop: {$part2Result}" . PHP_EOL;
+$profiler->reportProfile();
