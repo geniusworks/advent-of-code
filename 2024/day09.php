@@ -185,7 +185,7 @@ function calculateChecksum($blocks): float|int
 
 // Part 1
 
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
 $result1 = compactDiskPart1($input);
 $profiler->stopProfile();
@@ -194,7 +194,7 @@ $profiler->reportProfile();
 
 // Part 2
 
-$profiler = new Profiler('Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
 $result1 = compactDiskPart2($input);
 $profiler->stopProfile();

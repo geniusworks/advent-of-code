@@ -35,20 +35,18 @@ function calculateResult($input, $part): float|int
 
 // Part 1
 
-$profiler = new Profiler($profileName = 'Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
-
 $sumOfMultiplications = calculateResult($input, 1);
 $profiler->stopProfile();
-echo "{$profileName} - Sum of multiplications: {$sumOfMultiplications}" . PHP_EOL;
+echo "Sum of multiplications: {$sumOfMultiplications}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 1
 
-$profiler = new Profiler($profileName = 'Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
-
 $sumOfEnabledMultiplications = calculateResult($input, 2);
 $profiler->stopProfile();
-echo "{$profileName} - Sum of multiplications: {$sumOfEnabledMultiplications}" . PHP_EOL;
+echo "Sum of enabled multiplications: {$sumOfEnabledMultiplications}" . PHP_EOL;
 $profiler->reportProfile();

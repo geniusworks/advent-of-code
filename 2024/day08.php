@@ -123,7 +123,7 @@ foreach ($input as $y => $row) {
 
 // Part 1
 
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
 $resultPart1 = calculateImpact($input, $antennas);
 $profiler->stopProfile();
@@ -132,7 +132,7 @@ $profiler->reportProfile();
 
 // Part 2
 
-$profiler = new Profiler('Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
 $resultPart2 = calculateImpact2($input, $antennas);
 $profiler->stopProfile();

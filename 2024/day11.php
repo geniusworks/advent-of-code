@@ -1,7 +1,7 @@
 <?php
 /**
  * Advent of Code 2024
- * Day 11:
+ * Day 11: Plutonian Pebbles
  *
  * @author Martin Diekhoff
  * @link https://adventofcode.com/2024/day/11
@@ -43,7 +43,7 @@ function simulateBlinks($stoneData, $numBlinks): int
 // Part 1
 
 $blinkCount = 25;
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
 $result1 = simulateBlinks($input[0], $blinkCount);
 $profiler->stopProfile();
@@ -53,7 +53,7 @@ $profiler->reportProfile();
 // Part 2
 
 $blinkCount = 75;
-$profiler = new Profiler('Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
 $result1 = simulateBlinks($input[0], $blinkCount);
 $profiler->stopProfile();

@@ -106,7 +106,7 @@ $validator = new UpdateValidator($input);
 
 // Part 1
 
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
 $validUpdates = $validator->validateUpdates();
 $sumOfValidMiddles = $validator->getMiddleNumbers($validUpdates);
@@ -116,7 +116,7 @@ $profiler->reportProfile();
 
 // Part 2
 
-$profiler = new Profiler('Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
 $invalidUpdates = $validator->getInvalidUpdates();
 $sortedInvalidUpdates = $validator->sortInvalidUpdates($invalidUpdates);

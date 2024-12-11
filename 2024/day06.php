@@ -114,7 +114,7 @@ try {
 
     // Part 1
 
-    $profiler = new Profiler('Part 1');
+    $profiler = new Profiler();
     $profiler->startProfile();
     $part1Result = $simulator->simulatePart1();
     $profiler->stopProfile();
@@ -123,7 +123,7 @@ try {
 
     // Part 2
 
-    $profiler = new Profiler('Part 2');
+    $profiler = new Profiler();
     $profiler->startProfile();
     $part2Result = $simulator->simulatePart2();
     $profiler->stopProfile();

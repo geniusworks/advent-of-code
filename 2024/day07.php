@@ -148,7 +148,7 @@ function solvePart2($input): int
 
 // Part 1
 
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
 $resultPart1 = solvePart1($input);
 $profiler->stopProfile();
@@ -157,7 +157,7 @@ $profiler->reportProfile();
 
 // Part 2
 
-$profiler = new Profiler('Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
 $resultPart2 = solvePart2($input);
 $profiler->stopProfile();

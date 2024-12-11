@@ -122,7 +122,7 @@ function validate_a_positions($grid, $a_positions): array
 
 // Part 1
 
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
 $xmasOccurrences = find_xmas_occurrences($input);
 $profiler->stopProfile();
@@ -131,7 +131,7 @@ $profiler->reportProfile();
 
 // Part 2
 
-$profiler = new Profiler('Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
 $a_positions = find_a_positions($input);
 $xmasCrisscrossedOccurrences = count(validate_a_positions($input, $a_positions));

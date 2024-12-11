@@ -17,18 +17,18 @@ $input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT
 
 // Part 1
 
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
-$result1 = null; // TODO: Calculate the result for part 1.
+$result1 = null; // TODO: Calculate result for part 1.
 $profiler->stopProfile();
 echo "Result = {$result1}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 2
 
-$profiler = new Profiler('Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
-$result2 = null; // TODO: Calculate the result for part 2.
+$result2 = null; // TODO: Calculate result for part 2.
 $profiler->stopProfile();
 echo "Result = {$result2}" . PHP_EOL;
 $profiler->reportProfile();

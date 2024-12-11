@@ -13,7 +13,7 @@ $input = DataImporter::importFromFileWithDefaultFlags('input01.txt');
 
 // Part 1
 
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
 
 $leftList = [];
@@ -38,7 +38,7 @@ $profiler->reportProfile();
 
 // Part 2
 
-$profiler = new Profiler('Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
 
 $similarityScore = 0;

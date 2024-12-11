@@ -35,7 +35,7 @@ function isValid($levels): bool
 
 // Part 1
 
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
 
 $safeReports = 0;
@@ -54,7 +54,7 @@ $profiler->reportProfile();
 
 // Part 2
 
-$profiler = new Profiler('Part 2');
+$profiler = new Profiler();
 $profiler->startProfile();
 
 $safeReports = 0;
