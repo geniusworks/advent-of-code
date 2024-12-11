@@ -73,20 +73,24 @@ class UpdateValidator
 
     public function sortInvalidUpdates(array $updates): array
     {
-        return array_map(function ($update) {
-            $sortedUpdate = $update;
-            for ($i = 0; $i < count($sortedUpdate); $i++) {
-                for ($j = $i + 1; $j < count($sortedUpdate); $j++) {
-                    foreach ($this->rules as $rule) {
-                        if ($sortedUpdate[$i] == $rule[1] && $sortedUpdate[$j] == $rule[0]) {
-                            // Swap elements
-                            [$sortedUpdate[$i], $sortedUpdate[$j]] = [$sortedUpdate[$j], $sortedUpdate[$i]];
-                        }
+        $ruleMap = [];
+        foreach ($this->rules as $rule) {
+            $ruleMap[$rule[0]][$rule[1]] = true;
+        }
+
+        foreach ($updates as &$update) {
+            $updateSize = count($update);
+            for ($i = 0; $i < $updateSize - 1; $i++) {
+                for ($j = $i + 1; $j < $updateSize; $j++) {
+                    if (isset($ruleMap[$update[$i]][$update[$j]])) {
+                        // Swap elements
+                        [$update[$i], $update[$j]] = [$update[$j], $update[$i]];
                     }
                 }
             }
-            return $sortedUpdate;
-        }, $updates);
+        }
+
+        return $updates;
     }
 
     public function getInvalidUpdates(): array
@@ -104,25 +108,19 @@ $validator = new UpdateValidator($input);
 
 $profiler = new Profiler('Part 1');
 $profiler->startProfile();
-
-// Part 1: Correctly ordered updates
 $validUpdates = $validator->validateUpdates();
 $sumOfValidMiddles = $validator->getMiddleNumbers($validUpdates);
-
 $profiler->stopProfile();
-echo "Sum of middle numbers for correctly ordered updates: {$sumOfValidMiddles}" . PHP_EOL;
+echo "Sum of middle numbers for correctly-ordered updates: {$sumOfValidMiddles}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 2
 
 $profiler = new Profiler('Part 2');
 $profiler->startProfile();
-
-// Part 2: Reordered invalid updates
 $invalidUpdates = $validator->getInvalidUpdates();
 $sortedInvalidUpdates = $validator->sortInvalidUpdates($invalidUpdates);
 $sumOfInvalidMiddles = $validator->getMiddleNumbers($sortedInvalidUpdates);
-
 $profiler->stopProfile();
-echo "Sum of middle numbers for correctly ordered updates: {$sumOfInvalidMiddles}" . PHP_EOL;
+echo "Sum of middle numbers for incorrectly-ordered updates: {$sumOfInvalidMiddles}" . PHP_EOL;
 $profiler->reportProfile();
