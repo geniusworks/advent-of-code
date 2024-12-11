@@ -46,12 +46,7 @@ class GuardMovementSimulator
         throw new Exception("Start position not found");
     }
 
-    public function simulate(): array
-    {
-        return $this->run($this->grid, $this->startPosition);
-    }
-
-    private function run(array $grid, array $start, bool $detectLoop = false): array|int
+    private function run(array $grid, array $start, bool $detectLoop = false, bool $countObstructions = false): array|int
     {
         [$r, $c] = $start;
         $dir = 0;
@@ -71,9 +66,13 @@ class GuardMovementSimulator
             } // Part 1 obstruction counting
             else {
                 if (!isset($visited[$key]) && [$r, $c] !== $start) {
-                    $modifiedGrid = $grid;
-                    $modifiedGrid[$r][$c] = "#";
-                    $obstructionCount += $this->run($modifiedGrid, $start, true);
+                    if ($countObstructions) {
+                        $modifiedGrid = $grid;
+                        $modifiedGrid[$r][$c] = "#";
+                        $obstructionCount += $this->run($modifiedGrid, $start, true);
+                    } else {
+                        $obstructionCount++;
+                    }
                 }
             }
 
@@ -105,7 +104,7 @@ class GuardMovementSimulator
 
     public function simulatePart2(): int
     {
-        return $this->run($this->grid, $this->startPosition)[1];
+        return $this->run($this->grid, $this->startPosition, false, true)[1];
     }
 }
 
