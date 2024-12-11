@@ -11,16 +11,21 @@
 
 class Profiler
 {
+    private static int $partCounter = 0;
     private string $profileName;
-    private float $startTime;
     private int $initialMemory;
     private int $peakMemory;
+    private float $startTime;
 
-    public function __construct($profileName)
-    {
-        $this->profileName = $profileName;
-        $this->initialMemory = 0;
-        $this->peakMemory = 0;
+    public function __construct() {
+        $backtrace = debug_backtrace();
+        $filename = basename($backtrace[0]['file']);
+        $day = (int) substr($filename, 3, 2); // assuming filename is in the format "dayXX.php"
+        self::$partCounter++;
+        $this->profileName = "Day {$day} - Part " . self::$partCounter;
+        $this->initialMemory = memory_get_usage(false);
+        $this->peakMemory = $this->initialMemory;
+        $this->startTime = microtime(true);
     }
 
     public function startProfile(): void
@@ -57,7 +62,7 @@ class Profiler
     {
         $profile = $this->stopProfile();
         echo PHP_EOL;
-        echo "Profile Name: {$this->profileName}" . PHP_EOL;
+        echo "Profile: {$this->profileName}" . PHP_EOL;
         echo "Execution Time: " . ($profile['endTime'] - $profile['startTime']) . " seconds" . PHP_EOL;
         echo "Initial Memory Usage: " . $profile['initialMemory'] . " bytes" . PHP_EOL;
         echo "Peak Memory Usage: " . $profile['peakMemory'] . " bytes" . PHP_EOL;
