@@ -15,74 +15,48 @@ function find_xmas_occurrences($input): int
 {
     $xmasOccurrences = 0;
 
-    // Function to check occurrence with preserved original logic
-    $checkOccurrence = function ($chars, $pattern) {
-        return implode('', $chars) === $pattern;
-    };
-
     foreach ($input as $i => $line) {
         for ($j = 0; $j < strlen($line); $j++) {
             // Horizontal checks
             if ($j + 3 < strlen($line)) {
                 // Forward horizontal
-                $horizontalChars = [
-                    $line[$j],
-                    $line[$j + 1],
-                    $line[$j + 2],
-                    $line[$j + 3],
-                ];
-                if ($checkOccurrence($horizontalChars, 'XMAS')) {
+                if (substr($line, $j, 4) === 'XMAS') {
                     $xmasOccurrences++;
                 }
-                if ($checkOccurrence($horizontalChars, 'SAMX')) {
+                if (substr($line, $j, 4) === 'SAMX') {
                     $xmasOccurrences++;
                 }
             }
 
             // Vertical checks
             if ($i + 3 < count($input) && $j < strlen($line)) {
-                $verticalChars = [
-                    $line[$j],
-                    $input[$i + 1][$j],
-                    $input[$i + 2][$j],
-                    $input[$i + 3][$j],
-                ];
-                if ($checkOccurrence($verticalChars, 'XMAS')) {
+                $verticalChars = $line[$j] . $input[$i + 1][$j] . $input[$i + 2][$j] . $input[$i + 3][$j];
+                if ($verticalChars === 'XMAS') {
                     $xmasOccurrences++;
                 }
-                if ($checkOccurrence($verticalChars, 'SAMX')) {
+                if ($verticalChars === 'SAMX') {
                     $xmasOccurrences++;
                 }
             }
 
             // Diagonal top-left to bottom-right checks
             if ($i + 3 < count($input) && $j + 3 < strlen($line)) {
-                $diagonalChars = [
-                    $line[$j],
-                    $input[$i + 1][$j + 1],
-                    $input[$i + 2][$j + 2],
-                    $input[$i + 3][$j + 3],
-                ];
-                if ($checkOccurrence($diagonalChars, 'XMAS')) {
+                $diagonalChars = $line[$j] . $input[$i + 1][$j + 1] . $input[$i + 2][$j + 2] . $input[$i + 3][$j + 3];
+                if ($diagonalChars === 'XMAS') {
                     $xmasOccurrences++;
                 }
-                if ($checkOccurrence($diagonalChars, 'SAMX')) {
+                if ($diagonalChars === 'SAMX') {
                     $xmasOccurrences++;
                 }
             }
 
             // Diagonal bottom-left to top-right checks
             if ($i - 3 >= 0 && $j + 3 < strlen($line)) {
-                $diagonalChars = [
-                    $line[$j],
-                    $input[$i - 1][$j + 1],
-                    $input[$i - 2][$j + 2],
-                    $input[$i - 3][$j + 3],
-                ];
-                if ($checkOccurrence($diagonalChars, 'XMAS')) {
+                $diagonalChars = $line[$j] . $input[$i - 1][$j + 1] . $input[$i - 2][$j + 2] . $input[$i - 3][$j + 3];
+                if ($diagonalChars === 'XMAS') {
                     $xmasOccurrences++;
                 }
-                if ($checkOccurrence($diagonalChars, 'SAMX')) {
+                if ($diagonalChars === 'SAMX') {
                     $xmasOccurrences++;
                 }
             }
@@ -150,9 +124,7 @@ function validate_a_positions($grid, $a_positions): array
 
 $profiler = new Profiler('Part 1');
 $profiler->startProfile();
-
 $xmasOccurrences = find_xmas_occurrences($input);
-
 $profiler->stopProfile();
 echo "Total occurrences of XMAS: {$xmasOccurrences}" . PHP_EOL;
 $profiler->reportProfile();
@@ -161,10 +133,8 @@ $profiler->reportProfile();
 
 $profiler = new Profiler('Part 2');
 $profiler->startProfile();
-
 $a_positions = find_a_positions($input);
 $xmasCrisscrossedOccurrences = count(validate_a_positions($input, $a_positions));
-
 $profiler->stopProfile();
 echo "Total occurrences of X-MAS: {$xmasCrisscrossedOccurrences}" . PHP_EOL;
 $profiler->reportProfile();
