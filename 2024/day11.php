@@ -13,25 +13,6 @@ require_once __DIR__ . '/../' . 'bootstrap.php';
 
 $input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
 
-function blink($stones): array
-{
-    $stoneTree = [];
-    foreach ($stones as $stone) {
-        if ($stone == 0) {
-            $stoneTree[1] = ($stoneTree[1] ?? 0) + 1;
-        } elseif (strlen((string)$stone) % 2 == 0) {
-            $half = strlen((string)$stone) / 2;
-            $left = (int)substr((string)$stone, 0, $half);
-            $right = (int)substr((string)$stone, $half);
-            $stoneTree[$left] = ($stoneTree[$left] ?? 0) + 1;
-            $stoneTree[$right] = ($stoneTree[$right] ?? 0) + 1;
-        } else {
-            $stoneTree[$stone * 2024] = ($stoneTree[$stone * 2024] ?? 0) + 1;
-        }
-    }
-    return $stoneTree;
-}
-
 function simulateBlinks($stoneData, $numBlinks): int
 {
     $stoneTree = [];
