@@ -13,7 +13,7 @@ require_once __DIR__ . '/../' . 'bootstrap.php';
 
 $input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
 
-function parseInput($input): array
+function parseInput($input, $addOffset = false): array
 {
     $machines = [];
     $machineStrings = preg_split('/\s*\n\s*\n\s*/', implode("\n", $input));
@@ -25,55 +25,89 @@ function parseInput($input): array
             continue;
         }
 
-        // Extract button and prize information
-        preg_match('/Button A: X\+(\d+), Y\+(\d+)/', $lines[0], $buttonAMatch);
-        preg_match('/Button B: X\+(\d+), Y\+(\d+)/', $lines[1], $buttonBMatch);
-        preg_match('/Prize: X=(\d+), Y=(\d+)/', $lines[2], $prizeMatch);
+        preg_match('/Button A: X\+(-?\d+), Y\+(-?\d+)/', $lines[0], $buttonAMatch);
+        preg_match('/Button B: X\+(-?\d+), Y\+(-?\d+)/', $lines[1], $buttonBMatch);
+        preg_match('/Prize: X=(-?\d+), Y=(-?\d+)/', $lines[2], $prizeMatch);
 
         if (count($buttonAMatch) < 3 || count($buttonBMatch) < 3 || count($prizeMatch) < 3) {
             continue;
         }
 
+        $offset = $addOffset ? '10000000000000' : '0';
+
         $machines[] = [
-            'buttonA' => [intval($buttonAMatch[1]), intval($buttonAMatch[2])],
-            'buttonB' => [intval($buttonBMatch[1]), intval($buttonBMatch[2])],
-            'prize' => [intval($prizeMatch[1]), intval($prizeMatch[2])],
+            'buttonA' => [(string)($buttonAMatch[1]), (string)($buttonAMatch[2])],
+            'buttonB' => [(string)($buttonBMatch[1]), (string)($buttonBMatch[2])],
+            'prize' => [
+                $addOffset ? bcadd($prizeMatch[1], $offset) : $prizeMatch[1],
+                $addOffset ? bcadd($prizeMatch[2], $offset) : $prizeMatch[2],
+            ],
         ];
     }
     return $machines;
 }
 
-function findMinimumTokens($machine)
+function findMinimumTokens($machine): ?string
 {
     $buttonA = $machine['buttonA'];
     $buttonB = $machine['buttonB'];
     $prize = $machine['prize'];
-    $minTokens = PHP_INT_MAX;
 
-    for ($a = 0; $a <= 100; $a++) {
-        for ($b = 0; $b <= 100; $b++) {
-            // Check if the button presses exactly match the prize coordinates
-            if ($a * $buttonA[0] + $b * $buttonB[0] == $prize[0] &&
-                $a * $buttonA[1] + $b * $buttonB[1] == $prize[1]) {
-                // Calculate total token cost (3 tokens for A, 1 token for B)
-                $currentTokens = $a * 3 + $b;
-                $minTokens = min($minTokens, $currentTokens);
+    $det = bcsub(bcmul($buttonA[0], $buttonB[1]), bcmul($buttonB[0], $buttonA[1]));
+
+    if (bccomp($det, '0') == 0) {
+        return null; // No solution
+    }
+
+    $countA = bcdiv(bcsub(bcmul($prize[0], $buttonB[1]), bcmul($buttonB[0], $prize[1])), $det);
+    $countB = bcdiv(bcsub(bcmul($buttonA[0], $prize[1]), bcmul($prize[0], $buttonA[1])), $det);
+
+    $minTokens = null;
+    $searchRange = 1000;
+
+    for ($k = -$searchRange; $k <= $searchRange; $k++) {
+        $a = bcadd($countA, bcmul($buttonB[0], (string)$k));
+        $b = bcadd($countB, bcmul($buttonA[0], (string)$k));
+
+        $xCheck = bcadd(bcmul($a, $buttonA[0]), bcmul($b, $buttonB[0]));
+        $yCheck = bcadd(bcmul($a, $buttonA[1]), bcmul($b, $buttonB[1]));
+
+        if ($xCheck == $prize[0] && $yCheck == $prize[1]) {
+            $currentTokens = bcadd(bcmul($a, '3'), $b);
+
+            if ($minTokens === null || bccomp($currentTokens, $minTokens) < 0) {
+                $minTokens = $currentTokens;
             }
         }
     }
 
-    return $minTokens == PHP_INT_MAX ? null : $minTokens;
+    return $minTokens;
 }
 
-function solvePart1($input)
+function solvePart2($input): string
 {
-    $machines = parseInput($input);
-    $totalTokens = 0;
+    $machines = parseInput($input, true);
+    $totalTokens = '0';
 
     foreach ($machines as $machine) {
         $minTokens = findMinimumTokens($machine);
         if ($minTokens !== null) {
-            $totalTokens += $minTokens;
+            $totalTokens = bcadd($totalTokens, $minTokens);
+        }
+    }
+
+    return $totalTokens;
+}
+
+function solvePart1($input): string
+{
+    $machines = parseInput($input);
+    $totalTokens = '0';
+
+    foreach ($machines as $machine) {
+        $minTokens = findMinimumTokens($machine);
+        if ($minTokens !== null) {
+            $totalTokens = bcadd($totalTokens, $minTokens);
         }
     }
 
@@ -81,17 +115,17 @@ function solvePart1($input)
 }
 
 // Part 1
-$profiler = new Profiler('Part 1');
+$profiler = new Profiler();
 $profiler->startProfile();
 $result1 = solvePart1($input);
 $profiler->stopProfile();
-echo "Result = {$result1}" . PHP_EOL;
+echo "Fewest tokens to win possible prizes: {$result1}" . PHP_EOL;
 $profiler->reportProfile();
 
-// Part 2 (placeholder)
-$profiler = new Profiler('Part 2');
+// Part 2
+$profiler = new Profiler();
 $profiler->startProfile();
-$result2 = null; // TODO: Implement Part 2
+$result2 = solvePart2($input);
 $profiler->stopProfile();
-echo "Result = {$result2}" . PHP_EOL;
+echo "Fewest tokens to win possible prizes: {$result2}" . PHP_EOL;
 $profiler->reportProfile();
