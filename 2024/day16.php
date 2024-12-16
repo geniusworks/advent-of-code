@@ -7,6 +7,7 @@
  * @link https://adventofcode.com/2024/day/16
  */
 
+const INITIAL_DIRECTION = 3;
 const DATA_INPUT_FILE = 'input16.txt';
 
 require_once __DIR__ . '/../' . 'bootstrap.php';
@@ -30,16 +31,13 @@ function findLowestSolutionScore($input): int
         }
     }
 
-    // Ensure initial direction is East (index 3)
-    $initialDirection = 3;
-
     // Define the possible movements (up, down, left, right)
     $directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
     // Priority queue stores: [position, score, current direction, path]
     $priorityQueue = new SplPriorityQueue();
     $priorityQueue->setExtractFlags(SplPriorityQueue::EXTR_DATA);
-    $priorityQueue->insert([$start, 0, $initialDirection, []], 0);
+    $priorityQueue->insert([$start, 0, INITIAL_DIRECTION, []], 0);
 
     $visited = [];
 
@@ -87,33 +85,41 @@ function bestPathsTilesCount($input): int
     $cols = count($grid[0]);
     $start = null;
 
-    // Find the start position
-    for ($i = 0; $i < $rows; $i++) {
-        for ($j = 0; $j < $cols; $j++) {
-            if ($grid[$i][$j] === 'S') {
-                $start = [$i, $j];
-                break;
-            }
-        }
-        if ($start) {
+    // Find the start and end positions
+    foreach ($grid as $i => $row) {
+        if (($j = array_search('S', $row)) !== false) {
+            $start = [$i, $j];
             break;
         }
     }
 
-    // Ensure initial direction is East (index 3)
-    $initialDirection = 3;
-
     // Define the possible movements (up, down, left, right)
     $directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
-    // Queue stores: [position, score, current direction, path]
-    $queue = [[$start, 0, $initialDirection, []]];
+    // Use SplPriorityQueue instead of a regular array
+    $queue = new SplPriorityQueue();
+    $queue->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
+
+    // Initial state: [position, score, current direction, path]
+    $queue->insert([
+        'position' => $start,
+        'score' => 0,
+        'direction' => INITIAL_DIRECTION,
+        'path' => [],
+    ], -0); // Negative score for min-heap behavior
+
     $visited = [];
     $bestPaths = [];
     $lowestScore = PHP_INT_MAX;
 
-    while (!empty($queue)) {
-        [$position, $score, $currentDirection, $path] = array_shift($queue);
+    while (!$queue->isEmpty()) {
+        $item = $queue->extract();
+        $state = $item['data'];
+
+        $position = $state['position'];
+        $score = $state['score'];
+        $currentDirection = $state['direction'];
+        $path = $state['path'];
 
         // Create a unique key for visited tracking
         $key = implode(',', $position) . ',' . $currentDirection;
@@ -161,14 +167,15 @@ function bestPathsTilesCount($input): int
 
                 $newPath = array_merge($path, [$newPosition]);
 
-                $queue[] = [$newPosition, $newScore, $newDirection, $newPath];
+                // Insert into priority queue with negative score for min-heap
+                $queue->insert([
+                    'position' => $newPosition,
+                    'score' => $newScore,
+                    'direction' => $newDirection,
+                    'path' => $newPath,
+                ], -$newScore);
             }
         }
-
-        // Sort queue to prioritize lower scores
-        usort($queue, function ($a, $b) {
-            return $a[1] <=> $b[1];
-        });
     }
 
     // Count unique tiles on best paths and create visualization
@@ -200,16 +207,13 @@ function bestPathsTilesCount($input): int
     }
 
     // Print the visualization
-    echo "Visualization of best paths:\n";
-    foreach ($visualGrid as $row) {
-        echo implode('', $row) . "\n";
-    }
+    // echo "Visualization of best paths:\n";
+    // foreach ($visualGrid as $row) {
+    //     echo implode('', $row) . "\n";
+    // }
 
     // Print the tile count
-    $tileCount = count($bestPathTiles);
-    echo "\nTotal unique tiles on best paths: $tileCount\n";
-
-    return $tileCount;
+    return count($bestPathTiles);
 }
 
 // Part 1
