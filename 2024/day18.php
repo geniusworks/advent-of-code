@@ -13,7 +13,8 @@ require_once __DIR__ . '/../' . 'bootstrap.php';
 
 $input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
 
-function getMinimumStepsToExit($input, $maxSteps = 1024) {
+function getMinimumStepsToExit($input, $maxSteps = 1024)
+{
     // If input is a grid string, convert it to a 2D array
     if (is_string($input)) {
         $lines = explode("\n", trim($input));
@@ -23,11 +24,11 @@ function getMinimumStepsToExit($input, $maxSteps = 1024) {
     } else {
         // Determine grid size dynamically from coordinate input
         $maxX = max(array_map(function ($value) {
-            list($x, $y) = explode(',', $value);
+            [$x, $y] = explode(',', $value);
             return $x;
         }, $input));
         $maxY = max(array_map(function ($value) {
-            list($x, $y) = explode(',', $value);
+            [$x, $y] = explode(',', $value);
             return $y;
         }, $input));
 
@@ -37,7 +38,7 @@ function getMinimumStepsToExit($input, $maxSteps = 1024) {
         // Mark corrupted bytes
         $byteCount = 0;
         foreach ($input as $bytePosition) {
-            list($x, $y) = explode(',', $bytePosition);
+            [$x, $y] = explode(',', $bytePosition);
             $memorySpace[$x][$y] = '#';
             $byteCount++;
             if ($byteCount >= $maxSteps) {
@@ -58,7 +59,7 @@ function getMinimumStepsToExit($input, $maxSteps = 1024) {
     $visited[0][0] = 0;
 
     while (!$queue->isEmpty()) {
-        list($x, $y, $steps) = $queue->dequeue();
+        [$x, $y, $steps] = $queue->dequeue();
 
         // Check if we've reached the exit
         if ($x === count($memorySpace[0]) - 1 && $y === count($memorySpace) - 1) {
@@ -75,7 +76,6 @@ function getMinimumStepsToExit($input, $maxSteps = 1024) {
                 $newY >= 0 && $newY < count($memorySpace) &&
                 $memorySpace[$newY][$newX] === '.' &&
                 $steps + 1 < $visited[$newX][$newY]) {
-
                 $queue->enqueue([$newX, $newY, $steps + 1]);
                 $visited[$newX][$newY] = $steps + 1;
             }
@@ -86,11 +86,26 @@ function getMinimumStepsToExit($input, $maxSteps = 1024) {
     return -1;
 }
 
-function printGrid($grid) {
-    $transposedGrid = array_map(null, ...$grid);
-    foreach ($transposedGrid as $row) {
-        echo implode('', $row) . PHP_EOL;
+function getFirstBlockingByte($input)
+{
+    $left = 0;
+    $right = count($input);
+
+    while ($left < $right) {
+        $mid = $left + floor(($right - $left) / 2);
+        $result = getMinimumStepsToExit(array_slice($input, 0, $mid), $mid);
+
+        if ($result === -1) {
+            // If -1 is returned, we want to explore smaller slices
+            $right = $mid;
+        } else {
+            // If not -1, we need to explore larger slices
+            $left = $mid + 1;
+        }
     }
+
+    // At this point, $left should be the smallest index that produces -1
+    return $input[$left - 1];
 }
 
 // Part 1
@@ -99,14 +114,14 @@ $profiler = new Profiler();
 $profiler->startProfile();
 $result1 = getMinimumStepsToExit($input);
 $profiler->stopProfile();
-echo "Result: {$result1}" . PHP_EOL;
+echo "Minimum steps to exit: {$result1}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 2
 
 $profiler = new Profiler();
 $profiler->startProfile();
-$result2 = null; // TODO: Calculate the result for part 2.
+$result2 = getFirstBlockingByte($input);
 $profiler->stopProfile();
-echo "Result: {$result2}" . PHP_EOL;
+echo "First blocking byte: {$result2}" . PHP_EOL;
 $profiler->reportProfile();
