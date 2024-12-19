@@ -64,9 +64,53 @@ function countPossibleDesigns($input): int
     return $possibleCount;
 }
 
-function solvePart2($input)
+function getCombinationsCount($availablePatterns, $design)
 {
-    // @todo: Solve part 2
+    $design = trim($design);
+    if (empty($design)) {
+        return 0;
+    }
+
+    // dp[i] will store the number of ways to make the design up to position i
+    $dp = array_fill(0, strlen($design) + 1, 0);
+    $dp[0] = 1; // Empty string can be made in one way
+
+    // For each position in the design
+    for ($i = 1; $i <= strlen($design); $i++) {
+        // Try each pattern at the current position
+        foreach ($availablePatterns as $pattern) {
+            $pattern = trim($pattern);
+            $patternLength = strlen($pattern);
+
+            // Check if pattern can be used at current position
+            if ($i >= $patternLength) {
+                $designSubstring = substr($design, $i - $patternLength, $patternLength);
+                if ($designSubstring === $pattern) {
+                    // Add the number of ways to make the design up to the position
+                    // before this pattern
+                    $dp[$i] += $dp[$i - $patternLength];
+                }
+            }
+        }
+    }
+
+    return $dp[strlen($design)];
+}
+
+function countPossibleDesignCombinations($input)
+{
+    $lines = array_filter($input, 'strlen');
+    $patterns = array_map('trim', explode(',', $lines[0]));
+    $designs = array_slice($lines, 1);
+
+    $totalCombinations = 0;
+    foreach ($designs as $design) {
+        $combinations = getCombinationsCount($patterns, $design);
+        // echo "$design: $combinations combinations\n";
+        $totalCombinations += $combinations;
+    }
+
+    return $totalCombinations;
 }
 
 // Part 1
@@ -82,7 +126,7 @@ $profiler->reportProfile();
 
 $profiler = new Profiler();
 $profiler->startProfile();
-$result2 = solvePart2($input); // TODO: Calculate the result for part 2.
+$result2 = countPossibleDesignCombinations($input);
 $profiler->stopProfile();
-echo "Result: {$result2}" . PHP_EOL;
+echo "Number of possible design combinations: {$result2}" . PHP_EOL;
 $profiler->reportProfile();
