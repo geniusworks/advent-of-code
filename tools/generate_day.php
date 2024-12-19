@@ -36,13 +36,19 @@ require_once __DIR__ . '/../' . 'bootstrap.php';
 
 \$input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
 
-// Solution code follows here...
+function solvePart1(\$input) {
+    // @todo: Solve part 1
+}
+
+function solvePart2(\$input) {
+    // @todo: Solve part 2
+}
 
 // Part 1
 
 \$profiler = new Profiler();
 \$profiler->startProfile();
-\$result1 = null; // TODO: Calculate the result for part 1.
+\$result1 = solvePart1(\$input); // TODO: Calculate the result for part 1.
 \$profiler->stopProfile();
 echo "Result: {\$result1}" . PHP_EOL;
 \$profiler->reportProfile();
@@ -51,7 +57,7 @@ echo "Result: {\$result1}" . PHP_EOL;
 
 \$profiler = new Profiler();
 \$profiler->startProfile();
-\$result2 = null; // TODO: Calculate the result for part 2.
+\$result2 = solvePart2(\$input); // TODO: Calculate the result for part 2.
 \$profiler->stopProfile();
 echo "Result: {\$result2}" . PHP_EOL;
 \$profiler->reportProfile();
