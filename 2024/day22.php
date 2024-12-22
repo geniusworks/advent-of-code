@@ -37,9 +37,93 @@ function solvePart1($input): int
     return $sum;
 }
 
-function solvePart2($input)
-{
-    // @todo: Solve part 2
+function encodeChanges(array $changes): int {
+    // Encode the four changes into a single integer
+    $encoded = 0;
+    foreach ($changes as $i => $change) {
+        $encoded |= (($change + 16) & 0x1F) << (5 * $i);
+    }
+    return $encoded;
+}
+
+function generateNextPrice(int &$secretNumber): int {
+    $price = $secretNumber % 10;
+
+    // Update secret number using XOR and modulo operations
+    $secretNumber = (($secretNumber * 64) ^ $secretNumber) % 16777216;
+
+    // Use intdiv to ensure integer division
+    $secretNumber = intdiv($secretNumber, 32) ^ $secretNumber;
+    $secretNumber %= 16777216;
+
+    $secretNumber = (($secretNumber * 2048) ^ $secretNumber) % 16777216;
+
+    return $price;
+}
+
+function solvePart2($input): int {
+    $sequenceMap = [];
+    $maxBananas = 0;
+    $bestSequence = null;
+    $bestResults = [];
+
+    foreach ($input as $buyerIndex => $initialSecret) {
+        $secretNumber = (int)$initialSecret;
+        $lastPrices = [-1, -1, -1, -1, -1];  // Circular buffer
+        $pos = 0;
+
+        for ($i = 0; $i < 2000; $i++) {
+            $price = generateNextPrice($secretNumber);
+            $lastPrices[$pos] = $price;
+
+            if ($i >= 4) {
+                $changes = [];
+                for ($j = 1; $j <= 4; $j++) {
+                    $prevPos = ($pos - $j + 5) % 5;
+                    $currPos = ($pos - $j + 1 + 5) % 5;
+                    $changes[] = $lastPrices[$currPos] - $lastPrices[$prevPos];
+                }
+
+                $encoded = encodeChanges($changes);
+                if (!isset($sequenceMap[$encoded])) {
+                    $sequenceMap[$encoded] = ['total' => 0, 'prices' => []];
+                }
+                if (!isset($sequenceMap[$encoded]['prices'][$buyerIndex])) {
+                    $sequenceMap[$encoded]['prices'][$buyerIndex] = $price;
+                    $sequenceMap[$encoded]['total'] += $price;
+
+                    // Check if this sequence is the best
+                    if ($sequenceMap[$encoded]['total'] > $maxBananas) {
+                        $maxBananas = $sequenceMap[$encoded]['total'];
+                        $bestSequence = $changes;
+                        $bestResults = $sequenceMap[$encoded]['prices'];
+                    }
+                }
+            }
+
+            $pos = ($pos + 1) % 5;
+        }
+    }
+
+    if ($bestSequence) {
+        foreach ($input as $index => $buyer) {
+            if (isset($bestResults[$index])) {
+                echo "For the buyer with initial secret {$buyer}, changes " .
+                    implode(", ", $bestSequence) .
+                    " first occur when the price is {$bestResults[$index]}.\n";
+            } else {
+                echo "For the buyer with initial secret {$buyer}, the change sequence " .
+                    implode(", ", $bestSequence) .
+                    " does not occur in the first 2000 changes.\n";
+            }
+        }
+
+        echo "So, by asking the monkey to sell the first time each buyer's prices go " .
+            implode(", ", $bestSequence) . ", you would get " .
+            $maxBananas . " (" . implode(" + ", $bestResults) . ") bananas!\n";
+    }
+
+    return $maxBananas;
 }
 
 // Part 1
@@ -55,7 +139,7 @@ $profiler->reportProfile();
 
 $profiler = new Profiler();
 $profiler->startProfile();
-$result2 = solvePart2($input); // TODO: Calculate the result for part 2.
+$result2 = solvePart2($input);
 $profiler->stopProfile();
-echo "Result: {$result2}" . PHP_EOL;
+echo "The most bananas you could get: {$result2}" . PHP_EOL;
 $profiler->reportProfile();
