@@ -52,16 +52,62 @@ function solvePart1($input): int
         }
     }
 
-    foreach ($validSets as $validSet) {
-        echo implode(',', $validSet) . "\n";
-    }
-
     return count($validSets);
 }
 
-function solvePart2($input)
+function solvePart2($input): string
 {
-    // @todo: Solve part 2
+    // Parse the input into a graph representation
+    $connections = is_array($input) ? $input : explode("\n", $input);
+    $graph = [];
+    foreach ($connections as $connection) {
+        [$comp1, $comp2] = explode('-', $connection);
+        $graph[$comp1][$comp2] = true;
+        $graph[$comp2][$comp1] = true;
+    }
+
+    // Helper to find all cliques using Bron-Kerbosch algorithm
+    function findCliques($graph, $potentialClique = [], $remainingNodes = null, $skipNodes = [])
+    {
+        $cliques = [];
+        if ($remainingNodes === null) {
+            $remainingNodes = array_keys($graph);
+        }
+
+        if (empty($remainingNodes) && empty($skipNodes)) {
+            $cliques[] = $potentialClique;
+            return $cliques;
+        }
+
+        foreach ($remainingNodes as $node) {
+            $newClique = array_merge($potentialClique, [$node]);
+            $newRemaining = array_intersect(array_keys($graph[$node]), $remainingNodes);
+            $newSkip = array_intersect(array_keys($graph[$node]), $skipNodes);
+            $cliques = array_merge(
+                $cliques,
+                findCliques($graph, $newClique, $newRemaining, $newSkip),
+            );
+            $remainingNodes = array_diff($remainingNodes, [$node]);
+            $skipNodes[] = $node;
+        }
+
+        return $cliques;
+    }
+
+    // Find all cliques in the graph
+    $cliques = findCliques($graph);
+
+    // Find the largest clique
+    $largestClique = [];
+    foreach ($cliques as $clique) {
+        if (count($clique) > count($largestClique)) {
+            $largestClique = $clique;
+        }
+    }
+
+    // Sort the largest clique and create the password
+    sort($largestClique);
+    return implode(',', $largestClique);
 }
 
 // Part 1
@@ -79,5 +125,5 @@ $profiler = new Profiler();
 $profiler->startProfile();
 $result2 = solvePart2($input);
 $profiler->stopProfile();
-echo "Result: {$result2}" . PHP_EOL;
+echo "Password to get into the LAN party: {$result2}" . PHP_EOL;
 $profiler->reportProfile();
