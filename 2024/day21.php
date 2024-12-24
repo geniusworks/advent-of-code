@@ -17,13 +17,7 @@ $input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT
 
 function solvePart1($input): float|int
 {
-    $pads = [
-        [["789", "456", "123", " 0A"], []],
-        [[" ^A", "<v>"], []],
-    ];
-
-    $pads[0][1] = createKeyMap($pads[0][0]);
-    $pads[1][1] = createKeyMap($pads[1][0]);
+    $pads = getPads();
 
     return array_sum(array_map(fn($line) => getOptimalPath($line, 2, $pads) * (int)$line, $input));
 }
@@ -92,9 +86,26 @@ function getOptimalPath($code, $depth, $pads, $padType = 0)
     return $cache[$key] = $result;
 }
 
-function solvePart2($input)
+function solvePart2($input, $numberOfRobots): float|int
 {
-    // @todo: Solve part 2
+    $pads = getPads();
+
+    return array_sum(array_map(fn($line) => getOptimalPath($line, $numberOfRobots - 1, $pads) * (int)$line, $input));
+}
+
+/**
+ * @return array|array[]
+ */
+function getPads(): array
+{
+    $pads = [
+        [["789", "456", "123", " 0A"], []],
+        [[" ^A", "<v>"], []],
+    ];
+
+    $pads[0][1] = createKeyMap($pads[0][0]);
+    $pads[1][1] = createKeyMap($pads[1][0]);
+    return $pads;
 }
 
 // Part 1
@@ -103,14 +114,14 @@ $profiler = new Profiler();
 $profiler->startProfile();
 $result1 = solvePart1($input);
 $profiler->stopProfile();
-echo "Sum of the complexities of the five listed codes: {$result1}" . PHP_EOL;
+echo "Sum of the complexities of the five listed codes (Part 1): {$result1}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 2
 
 $profiler = new Profiler();
 $profiler->startProfile();
-$result2 = solvePart2($input); // TODO: Calculate the result for part 2.
+$result2 = solvePart2($input, 26);
 $profiler->stopProfile();
-echo "Result: {$result2}" . PHP_EOL;
+echo "Sum of the complexities of the five listed codes (Part 2): {$result2}" . PHP_EOL;
 $profiler->reportProfile();
