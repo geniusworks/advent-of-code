@@ -48,7 +48,7 @@ function solvePart2(\$input) {
 
 \$profiler = new Profiler();
 \$profiler->startProfile();
-\$result1 = solvePart1(\$input); // TODO: Calculate the result for part 1.
+\$result1 = solvePart1(\$input);
 \$profiler->stopProfile();
 echo "Result: {\$result1}" . PHP_EOL;
 \$profiler->reportProfile();
@@ -57,7 +57,7 @@ echo "Result: {\$result1}" . PHP_EOL;
 
 \$profiler = new Profiler();
 \$profiler->startProfile();
-\$result2 = solvePart2(\$input); // TODO: Calculate the result for part 2.
+\$result2 = solvePart2(\$input);
 \$profiler->stopProfile();
 echo "Result: {\$result2}" . PHP_EOL;
 \$profiler->reportProfile();
