@@ -9,11 +9,11 @@
 
 const DATA_INPUT_FILE = 'input24.txt';
 
-require_once __DIR__ . '/../' . 'bootstrap.php';
+require_once __DIR__ . '/../bootstrap.php';
 
 $input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
 
-const GATE_PAIR_COUNT = 4;
+const REQUIRED_GATE_PAIRS = 4;  // Number of wire pairs that need to be swapped
 
 function solvePart1($input): float|int
 {
@@ -97,13 +97,25 @@ function solvePart1($input): float|int
     return bindec($binary);
 }
 
+function findGate($input1, $gateType, $input2)
+{
+    global $gatesByInputs;
+    if (isset($gatesByInputs[$key = "$input1,$gateType,$input2"])) {
+        return $gatesByInputs[$key];
+    }
+    if (isset($gatesByInputs[$key = "$input2,$gateType,$input1"])) {
+        return $gatesByInputs[$key];
+    }
+    return false;
+}
+
 function solvePart2($input): string
 {
-    $wires = [];
-    $gates = [];
-    $isParsingGates = false;
+    global $gatesByInputs;
+    $gatesByInputs = [];
+    $pairsFound = 0;
 
-    // Parse input
+    $isParsingGates = false;
     foreach ($input as $line) {
         $line = trim($line);
         if (empty($line)) {
@@ -111,106 +123,72 @@ function solvePart2($input): string
             continue;
         }
 
-        if (!$isParsingGates) {
-            if (preg_match('/^(\w+):\s*(\d+)$/', $line, $matches)) {
-                $wires[$matches[1]] = intval($matches[2]);
-            }
-        } else {
-            if (preg_match('/^(\w+)\s+(AND|OR|XOR)\s+(\w+)\s+->\s+(\w+)$/', $line, $matches)) {
-                $gates[] = [
-                    'type' => $matches[2],
-                    'input1' => $matches[1],
-                    'input2' => $matches[3],
-                    'output' => $matches[4],
-                ];
-            }
+        if ($isParsingGates) {
+            $parts = explode(" ", $line);
+            $gatesByInputs["$parts[0],$parts[1],$parts[2]"] = $parts[4];
+            $gatesByInputs["$parts[2],$parts[1],$parts[0]"] = $parts[4];
         }
     }
 
-    // Function to check if a gate is correctly connected
-    $isCorrectGate = function ($gate) {
-        if (!str_starts_with($gate['output'], 'z')) {
-            return true;
-        } // Non-z wires are always correct
+    for ($swappedWires = [], $carryIn = $bitPos = 0; $bitPos < 45 && $pairsFound < REQUIRED_GATE_PAIRS; $bitPos++, $carryIn = $carryOut) {
+        $posStr = substr("0{$bitPos}", -2);
 
-        $zIndex = substr($gate['output'], 1);
-        $expectedX = "x$zIndex";
-        $expectedY = "y$zIndex";
-
-        return ($gate['type'] === 'AND' &&
-            (($gate['input1'] === $expectedX && $gate['input2'] === $expectedY) ||
-                ($gate['input1'] === $expectedY && $gate['input2'] === $expectedX)));
-    };
-
-    // Find all gate outputs
-    $outputs = array_unique(array_column($gates, 'output'));
-    sort($outputs);
-
-    // Try all possible combinations of GATE_PAIR_COUNT pairs of wire swaps
-    $swapPairs = [];
-    $used = [];
-
-    $findSwapPairs = function($depth = 0) use ($outputs, &$swapPairs, &$used, &$findSwapPairs, $gates, $isCorrectGate) {
-        if ($depth === GATE_PAIR_COUNT) {
-            // Create swap map from all pairs
-            $swapMap = [];
-            foreach ($swapPairs as $pair) {
-                $swapMap[$pair[0]] = $pair[1];
-                $swapMap[$pair[1]] = $pair[0];
-            }
-
-            // Check if this configuration makes all gates correct
-            foreach ($gates as $gate) {
-                $swappedGate = $gate;
-                if (isset($swapMap[$gate['output']])) {
-                    $swappedGate['output'] = $swapMap[$gate['output']];
-                }
-                if (!$isCorrectGate($swappedGate)) {
-                    return false;
-                }
-            }
-
-            // Found a valid solution
-            $swappedWires = [];
-            foreach ($swapPairs as $pair) {
-                $swappedWires[] = $pair[0];
-                $swappedWires[] = $pair[1];
-            }
-            sort($swappedWires);
-            return implode(',', $swappedWires);
+        if ($bitPos == 0) {
+            $carryOut = findGate("x$posStr", "AND", "y$posStr");
+            assert($carryOut);
+            continue;
         }
 
-        // Try each possible pair
-        $numOutputs = count($outputs);
-        for ($i = 0; $i < $numOutputs - 1; $i++) {
-            if (isset($used[$i])) continue;
-            for ($j = $i + 1; $j < $numOutputs; $j++) {
-                if (isset($used[$j])) continue;
+        $xorResult = findGate("x$posStr", "XOR", "y$posStr");
+        $andResult = findGate("x$posStr", "AND", "y$posStr");
+        $carryAndXor = findGate($carryIn, "AND", $xorResult);
 
-                // Try this pair
-                $used[$i] = $used[$j] = true;
-                $swapPairs[] = [$outputs[$i], $outputs[$j]];
-
-                $result = $findSwapPairs($depth + 1);
-                if ($result !== false) {
-                    return $result;
-                }
-
-                // Backtrack
-                array_pop($swapPairs);
-                unset($used[$i], $used[$j]);
-            }
+        if (!$carryAndXor) {
+            [$andResult, $xorResult] = [$xorResult, $andResult];
+            array_push($swappedWires, $xorResult, $andResult);
+            $pairsFound++;
+            $carryAndXor = findGate($carryIn, "AND", $xorResult);
         }
 
-        return false;
-    };
+        $sum = findGate($carryIn, "XOR", $xorResult);
 
-    $result = $findSwapPairs();
-    return $result === false ? "No solution found" : $result;
+        if ($xorResult[0] == 'z' && $pairsFound < REQUIRED_GATE_PAIRS) {
+            [$xorResult, $sum] = [$sum, $xorResult];
+            array_push($swappedWires, $xorResult, $sum);
+            $pairsFound++;
+        }
+
+        if ($andResult[0] == 'z' && $pairsFound < REQUIRED_GATE_PAIRS) {
+            [$andResult, $sum] = [$sum, $andResult];
+            array_push($swappedWires, $andResult, $sum);
+            $pairsFound++;
+        }
+
+        if ($carryAndXor[0] == 'z' && $pairsFound < REQUIRED_GATE_PAIRS) {
+            [$carryAndXor, $sum] = [$sum, $carryAndXor];
+            array_push($swappedWires, $carryAndXor, $sum);
+            $pairsFound++;
+        }
+
+        $carryOut = findGate($carryAndXor, "OR", $andResult);
+
+        if ($carryOut && $sum && $carryOut[0] == 'z' && $carryOut !== "z45" && $pairsFound < REQUIRED_GATE_PAIRS) {
+            [$carryOut, $sum] = [$sum, $carryOut];
+            array_push($swappedWires, $carryOut, $sum);
+            $pairsFound++;
+        }
+    }
+
+    assert(
+        $pairsFound === REQUIRED_GATE_PAIRS,
+        "Expected exactly " . REQUIRED_GATE_PAIRS . " gate pairs, found $pairsFound",
+    );
+    sort($swappedWires);
+
+    return implode(',', $swappedWires);
 }
 
 // Part 1
-
 $profiler = new Profiler();
 $profiler->startProfile();
 $result1 = solvePart1($input);
@@ -219,7 +197,6 @@ echo "Decimal number output on the wires starting with z: {$result1}" . PHP_EOL;
 $profiler->reportProfile();
 
 // Part 2
-
 $profiler = new Profiler();
 $profiler->startProfile();
 $result2 = solvePart2($input);
