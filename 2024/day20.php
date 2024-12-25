@@ -13,7 +13,8 @@ require_once __DIR__ . '/../' . 'bootstrap.php';
 
 $input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
 
-const MINIMUM_PICOSECONDS_SAVED = 100;
+const MIN_PICOSECONDS_SAVED = 100;
+const MAX_CHEAT_PICOSECONDS = 20;
 
 function solvePart1($input): float|int
 {
@@ -85,16 +86,16 @@ function solvePart1($input): float|int
     }
 
     // Debug output for verification
-//    ksort($cheats);
-//    foreach ($cheats as $saving => $count) {
-//        echo "Saves $saving picoseconds: $count cheats\n";
-//    }
+    // ksort($cheats);
+    // foreach ($cheats as $saving => $count) {
+    //     echo "Saves $saving picoseconds: $count cheats\n";
+    // }
 
     // Return count of cheats saving >= 100 picoseconds
     return array_sum(
         array_filter(
             $cheats,
-            fn($saving) => $saving >= MINIMUM_PICOSECONDS_SAVED,
+            fn($saving) => $saving >= MIN_PICOSECONDS_SAVED,
             ARRAY_FILTER_USE_KEY,
         ),
     );
@@ -153,9 +154,115 @@ function isValidCheatSequence($grid, $start, $pos1, $pos2): bool
     return $hasWall && $endsOnTrack;
 }
 
-function solvePart2($input)
+function solvePart2($input): int
 {
-    // @todo: Solve part 2
+    $grid = array_map('str_split', $input);
+    $rows = count($grid);
+    $cols = count($grid[0]);
+
+    // Find start and end positions
+    $start = $end = null;
+    for ($i = 0; $i < $rows; $i++) {
+        for ($j = 0; $j < $cols; $j++) {
+            if ($grid[$i][$j] === 'S') {
+                $start = [$i, $j];
+                $grid[$i][$j] = '.';
+            } elseif ($grid[$i][$j] === 'E') {
+                $end = [$i, $j];
+                $grid[$i][$j] = '.';
+            }
+        }
+    }
+
+    // Pre-calculate distances from start to all points and from all points to end
+    $distancesFromStart = calculateAllDistances($grid, $start);
+    $distancesToEnd = calculateAllDistances($grid, $end, true);
+
+    // Normal shortest path length
+    $normalDistance = $distancesFromStart["{$end[0]},{$end[1]}"];
+
+    // Find cheats
+    $cheats = [];
+    $directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+    // Try each possible starting position for a cheat
+    foreach ($distancesFromStart as $startPosStr => $distFromStart) {
+        [$startRow, $startCol] = explode(',', $startPosStr);
+        $startRow = (int)$startRow;
+        $startCol = (int)$startCol;
+
+        // Queue for BFS: [row, col, steps used, hasWall]
+        $queue = new SplQueue();
+        $queue->enqueue([$startRow, $startCol, 0, false]);
+        $visited = [];
+        $bestPathToEnd = [];  // Track best path to each end position
+
+        while (!$queue->isEmpty()) {
+            [$row, $col, $steps, $hasWall] = $queue->dequeue();
+            $currentPosStr = "{$row},{$col}";
+
+            // If we've gone through a wall and we're on a track
+            if ($hasWall && $grid[$row][$col] === '.' && isset($distancesToEnd[$currentPosStr])) {
+                $totalDist = $distFromStart + $steps + $distancesToEnd[$currentPosStr];
+                $timeSaved = $normalDistance - $totalDist;
+
+                if ($timeSaved >= 50) {  // Match example output threshold
+                    // Create unique cheat identifier based on start and end positions
+                    $cheatKey = "{$startRow},{$startCol}->{$row},{$col}";
+
+                    // Only keep this path if it's better than what we've seen before
+                    $endKey = "{$row},{$col}";
+                    if (!isset($bestPathToEnd[$endKey]) || $totalDist < $bestPathToEnd[$endKey]) {
+                        $bestPathToEnd[$endKey] = $totalDist;
+                        if (!isset($cheats[$timeSaved][$cheatKey])) {
+                            $cheats[$timeSaved][$cheatKey] = true;
+                        }
+                    }
+                }
+            }
+
+            // Continue exploring if we haven't used too many steps
+            if ($steps < MAX_CHEAT_PICOSECONDS) {
+                foreach ($directions as [$dr, $dc]) {
+                    $newRow = $row + $dr;
+                    $newCol = $col + $dc;
+
+                    if (!isInBounds([$newRow, $newCol], $rows, $cols)) {
+                        continue;
+                    }
+
+                    $isWall = $grid[$newRow][$newCol] === '#';
+                    $newHasWall = $hasWall || $isWall;
+
+                    // Skip if we've visited this position in this state with fewer steps
+                    $visitKey = "{$newRow},{$newCol}-{$newHasWall}";
+                    if (isset($visited[$visitKey]) && $visited[$visitKey] <= $steps) {
+                        continue;
+                    }
+
+                    $visited[$visitKey] = $steps;
+                    $queue->enqueue([$newRow, $newCol, $steps + 1, $newHasWall]);
+                }
+            }
+        }
+    }
+
+    // Output debug information in the example format
+    // ksort($cheats);
+    // foreach ($cheats as $saving => $uniqueCheats) {
+    //     $count = count($uniqueCheats);
+    //     echo "There are $count cheats that save $saving picoseconds.\n";
+    // }
+
+    // Count total cheats that save at least MIN_PICOSECONDS_SAVED
+    $totalCheats = 0;
+    foreach ($cheats as $saving => $uniqueCheats) {
+        if ($saving >= MIN_PICOSECONDS_SAVED) {
+            $totalCheats += count($uniqueCheats);
+        }
+    }
+
+    return $totalCheats;
 }
 
 // Part 1
@@ -171,7 +278,7 @@ $profiler->reportProfile();
 
 $profiler = new Profiler();
 $profiler->startProfile();
-$result2 = solvePart2($input); // TODO: Calculate the result for part 2.
+$result2 = solvePart2($input);
 $profiler->stopProfile();
-echo "Result: {$result2}" . PHP_EOL;
+echo "Number of cheats saving you at least 100 picoseconds: {$result2}" . PHP_EOL;
 $profiler->reportProfile();
