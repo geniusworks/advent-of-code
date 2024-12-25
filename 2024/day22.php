@@ -37,148 +37,73 @@ function solvePart1($input): int
     return $sum;
 }
 
-function generateNextPrice(int &$secretNumber): int
+function solvePart2(array $input): int
 {
-    $price = $secretNumber % 10;
+    // Instead of storing all sequences, we'll test each possible sequence pattern
+    // Differences range from -9 to 9, so we'll iterate through all possibilities
+    $maxTotal = 0;
 
-    // Update secret number using XOR and modulo operations
-    $secretNumber = (($secretNumber * 64) ^ $secretNumber) % 16777216;
-
-    // Use intdiv to ensure integer division
-    $secretNumber = intdiv($secretNumber, 32) ^ $secretNumber;
-    $secretNumber %= 16777216;
-
-    $secretNumber = (($secretNumber * 2048) ^ $secretNumber) % 16777216;
-
-    return $price;
-}
-
-function printBestSequenceResults(array $input, array $bestSequence, array $bestResults): void
-{
-    foreach ($input as $index => $buyer) {
-        if (isset($bestResults[$index])) {
-            echo "For the buyer with initial secret {$buyer}, changes " .
-                implode(", ", $bestSequence) .
-                " first occur when the price is {$bestResults[$index]}.\n";
-        } else {
-            echo "For the buyer with initial secret {$buyer}, the change sequence " .
-                implode(", ", $bestSequence) .
-                " does not occur in the first 2000 changes.\n";
-        }
-    }
-
-    echo "So, by asking the monkey to sell the first time each buyer's prices go " .
-        implode(", ", $bestSequence) . ", you would get " .
-        array_sum($bestResults) . " (" . implode(" + ", $bestResults) . ") bananas!\n";
-}
-
-function findFirstOccurrence(int $initialSecret, array $targetChanges): array
-{
-    $secretNumber = $initialSecret;
-    $prices = [];
-
-    // Get initial price but don't use it
-    generateNextPrice($secretNumber);
-
-    // Get first 5 prices
-    for ($i = 0; $i < 5; $i++) {
-        $prices[] = generateNextPrice($secretNumber);
-    }
-
-    // Check first sequence
-    $changes = [];
-    for ($i = 0; $i < 4; $i++) {
-        $changes[] = $prices[$i + 1] - $prices[$i];
-    }
-    if ($changes === $targetChanges) {
-        return ['found' => true, 'price' => end($prices)];
-    }
-
-    // Generate remaining prices and check sequences
-    for ($i = 5; $i < 2000; $i++) {
-        array_shift($prices);
-        $prices[] = generateNextPrice($secretNumber);
-
-        $changes = [];
-        for ($j = 0; $j < 4; $j++) {
-            $changes[] = $prices[$j + 1] - $prices[$j];
-        }
-        if ($changes === $targetChanges) {
-            return ['found' => true, 'price' => end($prices)];
-        }
-    }
-
-    return ['found' => false, 'price' => 0];
-}
-
-function solvePart2($input): int
-{
-    $maxBananas = 0;
-    $bestSequence = null;
-    $bestResults = [];
-
-    // Process first buyer to get all possible sequences
-    $firstSecret = (int)$input[0];
-    $prices = [];
-    $sequences = [];
-
-    // Get initial price but don't use it
-    generateNextPrice($firstSecret);
-
-    // Get first 5 prices
-    for ($i = 0; $i < 5; $i++) {
-        $prices[] = generateNextPrice($firstSecret);
-    }
-
-    // Check first sequence
-    $changes = [];
-    for ($i = 0; $i < 4; $i++) {
-        $changes[] = $prices[$i + 1] - $prices[$i];
-    }
-    $key = implode(',', $changes);
-    $sequences[$key] = $changes;
-
-    // Generate remaining prices and collect sequences
-    for ($i = 5; $i < 2000; $i++) {
-        array_shift($prices);
-        $prices[] = generateNextPrice($firstSecret);
-
-        $changes = [];
-        for ($j = 0; $j < 4; $j++) {
-            $changes[] = $prices[$j + 1] - $prices[$j];
-        }
-        $key = implode(',', $changes);
-        if (!isset($sequences[$key])) {
-            $sequences[$key] = $changes;
-        }
-    }
-
-    // Try each unique sequence
-    foreach ($sequences as $changes) {
-        $total = 0;
-        $currentPrices = [];
-
-        // Check each buyer
-        foreach ($input as $buyerIndex => $buyerSecret) {
-            $result = findFirstOccurrence($buyerSecret, $changes);
-            if ($result['found']) {
-                $total += $result['price'];
-                $currentPrices[$buyerIndex] = $result['price'];
+    // For each possible sequence of 4 differences
+    for ($d1 = -9; $d1 <= 9; $d1++) {
+        for ($d2 = -9; $d2 <= 9; $d2++) {
+            for ($d3 = -9; $d3 <= 9; $d3++) {
+                for ($d4 = -9; $d4 <= 9; $d4++) {
+                    $total = processSequence($input, [$d1, $d2, $d3, $d4]);
+                    if ($total > $maxTotal) {
+                        $maxTotal = $total;
+                    }
+                }
             }
         }
+    }
 
-        if ($total > $maxBananas) {
-            $maxBananas = $total;
-            $bestSequence = $changes;
-            $bestResults = $currentPrices;
+    return $maxTotal;
+}
+
+function processSequence(array $input, array $targetDiffs): int
+{
+    $total = 0;
+    $modulo = 16777216;
+
+    foreach ($input as $initialNumber) {
+        $prices = array_fill(0, 5, 0);
+        $priceIndex = 0;
+        $secretNumber = (int)$initialNumber;
+        $found = false;
+
+        $prices[$priceIndex] = $secretNumber % 10;
+        $filledPrices = 1;
+
+        for ($i = 0; $i < 2000 && !$found; $i++) {
+            $secretNumber = (($secretNumber * 64) ^ $secretNumber) % $modulo;
+            $secretNumber = ((int)($secretNumber / 32) ^ $secretNumber) % $modulo;
+            $secretNumber = (($secretNumber * 2048) ^ $secretNumber) % $modulo;
+
+            $priceIndex = ($priceIndex + 1) % 5;
+            $prices[$priceIndex] = $secretNumber % 10;
+            $filledPrices++;
+
+            if ($filledPrices >= 5) {
+                // Check if current window matches target sequence
+                $matches = true;
+                for ($j = 1; $j <= 4; $j++) {
+                    $curr = ($priceIndex - 4 + $j + 5) % 5;
+                    $prev = ($priceIndex - 4 + $j - 1 + 5) % 5;
+                    if (($prices[$curr] - $prices[$prev]) !== $targetDiffs[$j - 1]) {
+                        $matches = false;
+                        break;
+                    }
+                }
+
+                if ($matches) {
+                    $total += $prices[$priceIndex];
+                    $found = true;  // Stop processing this buyer once we find a match
+                }
+            }
         }
     }
 
-    if ($bestSequence) {
-        printBestSequenceResults($input, $bestSequence, $bestResults);
-    }
-
-    return $maxBananas;
+    return $total;
 }
 
 // Part 1
