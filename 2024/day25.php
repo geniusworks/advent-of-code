@@ -99,5 +99,5 @@ $profiler = new Profiler();
 $profiler->startProfile();
 $result2 = solvePart2($input);
 $profiler->stopProfile();
-echo "Result: {$result2}" . PHP_EOL;
+echo "Number of unique lock/key pairs fit together without overlapping: {$result2}" . PHP_EOL;
 $profiler->reportProfile();
