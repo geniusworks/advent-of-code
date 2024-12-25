@@ -13,22 +13,25 @@ require_once __DIR__ . '/../' . 'bootstrap.php';
 
 $input = DataImporter::importFromFileWithDefaultFlags(__DIR__ . '/' . DATA_INPUT_FILE);
 
+const SECRET_NUMBER_QUOTA = 2000;
+const PRUNING_MODULO = 16777216;
+
 function solvePart1($input): int
 {
     $sum = 0;
 
-    foreach ($input as $index => $buyer) {
+    foreach ($input as $buyer) {
         $secretNumber = (int)$buyer;
-        for ($i = 0; $i < 2000; $i++) {
+        for ($i = 0; $i < SECRET_NUMBER_QUOTA; $i++) {
             $secretNumber = ($secretNumber * 64) ^ $secretNumber;
-            $secretNumber %= 16777216;
+            $secretNumber %= PRUNING_MODULO;
 
             $temp = (int)($secretNumber / 32);
             $secretNumber = $temp ^ $secretNumber;
-            $secretNumber %= 16777216;
+            $secretNumber %= PRUNING_MODULO;
 
             $secretNumber = ($secretNumber * 2048) ^ $secretNumber;
-            $secretNumber %= 16777216;
+            $secretNumber %= PRUNING_MODULO;
         }
         // echo ($index + 1) . ": " . $secretNumber . "\n";
         $sum += $secretNumber;
@@ -39,71 +42,72 @@ function solvePart1($input): int
 
 function solvePart2(array $input): int
 {
-    // Instead of storing all sequences, we'll test each possible sequence pattern
-    // Differences range from -9 to 9, so we'll iterate through all possibilities
     $maxTotal = 0;
+    $sequenceTotals = [];  // Track totals for each sequence across all chunks
 
-    // For each possible sequence of 4 differences
-    for ($d1 = -9; $d1 <= 9; $d1++) {
-        for ($d2 = -9; $d2 <= 9; $d2++) {
-            for ($d3 = -9; $d3 <= 9; $d3++) {
-                for ($d4 = -9; $d4 <= 9; $d4++) {
-                    $total = processSequence($input, [$d1, $d2, $d3, $d4]);
-                    if ($total > $maxTotal) {
-                        $maxTotal = $total;
+    // Process buyers in chunks to reduce memory usage
+    $chunkSize = 100;  // Adjust if needed
+    for ($buyerStart = 0; $buyerStart < count($input); $buyerStart += $chunkSize) {
+        $buyerEnd = min($buyerStart + $chunkSize, count($input));
+        $sequences = [];
+
+        // Process one chunk of buyers
+        for ($buyerIndex = $buyerStart; $buyerIndex < $buyerEnd; $buyerIndex++) {
+            $prices = [];
+            $secretNumber = (int)$input[$buyerIndex];
+
+            // Get first price
+            $window = [$secretNumber % 10];
+
+            // Use a sliding window approach
+            for ($i = 0; $i < SECRET_NUMBER_QUOTA; $i++) {
+                $secretNumber = (($secretNumber * 64) ^ $secretNumber) % PRUNING_MODULO;
+                $secretNumber = ((int)($secretNumber / 32) ^ $secretNumber) % PRUNING_MODULO;
+                $secretNumber = (($secretNumber * 2048) ^ $secretNumber) % PRUNING_MODULO;
+                $currentPrice = $secretNumber % 10;
+
+                $window[] = $currentPrice;
+                if (count($window) > 5) {
+                    array_shift($window);
+
+                    // Calculate differences
+                    $diff1 = $window[1] - $window[0];
+                    $diff2 = $window[2] - $window[1];
+                    $diff3 = $window[3] - $window[2];
+                    $diff4 = $window[4] - $window[3];
+
+                    // Store sequence as a string key for clarity (memory is less critical for example data)
+                    $key = "$diff1,$diff2,$diff3,$diff4";
+
+                    // Only store if we haven't seen this sequence for this buyer
+                    if (!isset($sequences[$key][$buyerIndex])) {
+                        $sequences[$key][$buyerIndex] = $window[4];
                     }
                 }
             }
+        }
+
+        // Update running totals for each sequence
+        foreach ($sequences as $key => $buyerPrices) {
+            if (!isset($sequenceTotals[$key])) {
+                $sequenceTotals[$key] = 0;
+            }
+            $sequenceTotals[$key] += array_sum($buyerPrices);
+        }
+
+        // Clear chunk data
+        unset($sequences);
+    }
+
+    // Find the maximum total across all sequences
+    foreach ($sequenceTotals as $sequence => $total) {
+        if ($total > $maxTotal) {
+            $maxTotal = $total;
+            // echo "Best sequence: $sequence gave total: $total\n";
         }
     }
 
     return $maxTotal;
-}
-
-function processSequence(array $input, array $targetDiffs): int
-{
-    $total = 0;
-    $modulo = 16777216;
-
-    foreach ($input as $initialNumber) {
-        $prices = array_fill(0, 5, 0);
-        $priceIndex = 0;
-        $secretNumber = (int)$initialNumber;
-        $found = false;
-
-        $prices[$priceIndex] = $secretNumber % 10;
-        $filledPrices = 1;
-
-        for ($i = 0; $i < 2000 && !$found; $i++) {
-            $secretNumber = (($secretNumber * 64) ^ $secretNumber) % $modulo;
-            $secretNumber = ((int)($secretNumber / 32) ^ $secretNumber) % $modulo;
-            $secretNumber = (($secretNumber * 2048) ^ $secretNumber) % $modulo;
-
-            $priceIndex = ($priceIndex + 1) % 5;
-            $prices[$priceIndex] = $secretNumber % 10;
-            $filledPrices++;
-
-            if ($filledPrices >= 5) {
-                // Check if current window matches target sequence
-                $matches = true;
-                for ($j = 1; $j <= 4; $j++) {
-                    $curr = ($priceIndex - 4 + $j + 5) % 5;
-                    $prev = ($priceIndex - 4 + $j - 1 + 5) % 5;
-                    if (($prices[$curr] - $prices[$prev]) !== $targetDiffs[$j - 1]) {
-                        $matches = false;
-                        break;
-                    }
-                }
-
-                if ($matches) {
-                    $total += $prices[$priceIndex];
-                    $found = true;  // Stop processing this buyer once we find a match
-                }
-            }
-        }
-    }
-
-    return $total;
 }
 
 // Part 1
