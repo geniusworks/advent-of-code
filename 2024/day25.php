@@ -80,8 +80,9 @@ function fits(array $lock, array $key): bool
     return true;
 }
 
-function solvePart2($input) {
-    // @todo: Solve part 2
+function solvePart2($input): string
+{
+    return "Santa returns the chronicle to you.  Mission accomplished.";
 }
 
 // Part 1
@@ -99,5 +100,5 @@ $profiler = new Profiler();
 $profiler->startProfile();
 $result2 = solvePart2($input);
 $profiler->stopProfile();
-echo "Number of unique lock/key pairs fit together without overlapping: {$result2}" . PHP_EOL;
+echo "{$result2}" . PHP_EOL;
 $profiler->reportProfile();
