@@ -27,6 +27,8 @@ To run all of the solutions: `for file in *.php; do php "$file"; done`
 
 ## License
 
-My solutions are dedicated to the public domain under the CC0 1.0 Universal license.
+These solutions are dedicated to the public domain using the Unlicense. You can use, modify, and distribute them freely.
+
+[Unlicense](https://unlicense.org/)
 
 Martin Diekhoff
