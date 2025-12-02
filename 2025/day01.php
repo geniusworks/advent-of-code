@@ -48,16 +48,64 @@ function simulateDial(array $input): array
     return [$position, $hitsAtZero];
 }
 
+function simulateDialAllClicks(array $input): array
+{
+    $position = 50;
+    $hitsAtZero = 0;
+
+    foreach ($input as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            continue;
+        }
+
+        $direction = $line[0];
+        $distance = (int) substr($line, 1);
+
+        if ($direction === 'L') {
+            $firstHitOffset = $position % 100;
+            if ($firstHitOffset === 0) {
+                $firstHitOffset = 100;
+            }
+        } elseif ($direction === 'R') {
+            $firstHitOffset = (100 - $position) % 100;
+            if ($firstHitOffset === 0) {
+                $firstHitOffset = 100;
+            }
+        } else {
+            continue;
+        }
+
+        if ($distance >= $firstHitOffset) {
+            $hitsAtZero += 1 + intdiv($distance - $firstHitOffset, 100);
+        }
+
+        $steps = $distance % 100;
+
+        if ($direction === 'L') {
+            $position = ($position - $steps) % 100;
+        } elseif ($direction === 'R') {
+            $position = ($position + $steps) % 100;
+        }
+
+        if ($position < 0) {
+            $position += 100;
+        }
+    }
+
+    return [$position, $hitsAtZero];
+}
+
 function solvePart1(array $input)
 {
-    [$finalPosition, ] = simulateDial($input);
+    [, $hitsAtZero] = simulateDial($input);
 
-    return $finalPosition;
+    return $hitsAtZero;
 }
 
 function solvePart2(array $input)
 {
-    [, $hitsAtZero] = simulateDial($input);
+    [, $hitsAtZero] = simulateDialAllClicks($input);
 
     return $hitsAtZero;
 }
