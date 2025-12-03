@@ -98,7 +98,78 @@ function solvePart1(array $input)
 
 function solvePart2(array $input)
 {
-    return null;
+    if (empty($input)) {
+        return 0;
+    }
+
+    $line = trim($input[0]);
+    if ($line === '') {
+        return 0;
+    }
+
+    $ranges = parseRanges($line);
+    if (empty($ranges)) {
+        return 0;
+    }
+
+    $globalMin = PHP_INT_MAX;
+    $globalMax = PHP_INT_MIN;
+
+    foreach ($ranges as [$start, $end]) {
+        if ($start < $globalMin) {
+            $globalMin = $start;
+        }
+        if ($end > $globalMax) {
+            $globalMax = $end;
+        }
+    }
+
+    $maxDigits = strlen((string) $globalMax);
+    $sum = 0;
+    $seen = [];
+
+    $startBase = 1;
+    for ($patternLen = 1; $patternLen <= $maxDigits; $patternLen++) {
+        $maxRepeats = intdiv($maxDigits, $patternLen);
+        if ($maxRepeats < 2) {
+            break;
+        }
+
+        $endBase = $startBase * 10;
+
+        for ($base = $startBase; $base < $endBase; $base++) {
+            $pattern = (string) $base;
+
+            for ($k = 2; $k <= $maxRepeats; $k++) {
+                $candidateStr = str_repeat($pattern, $k);
+                $candidate = (int) $candidateStr;
+
+                if ($candidate > $globalMax) {
+                    break;
+                }
+
+                if ($candidate < $globalMin) {
+                    continue;
+                }
+
+                if (isset($seen[$candidate])) {
+                    continue;
+                }
+
+                foreach ($ranges as [$start, $end]) {
+                    if ($candidate >= $start && $candidate <= $end) {
+                        $sum += $candidate;
+                        $seen[$candidate] = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $startBase = $endBase;
+    }
+
+    return $sum;
 }
 
 $profiler = new Profiler();
