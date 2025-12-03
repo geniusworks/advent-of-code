@@ -58,6 +58,56 @@ function maxBankJoltage(string $bank): int
     return $best;
 }
 
+function maxBankJoltage12(string $bank): int
+{
+    $bank = trim($bank);
+    $length = strlen($bank);
+
+    if ($length === 0) {
+        return 0;
+    }
+
+    $k = 12;
+
+    if ($length <= $k) {
+        return (int) $bank;
+    }
+
+    $result = '';
+    $start = 0;
+
+    for ($pos = 0; $pos < $k; $pos++) {
+        $remaining = $k - $pos;
+        $end = $length - $remaining;
+
+        $bestDigit = -1;
+        $bestIndex = $start;
+
+        for ($i = $start; $i <= $end; $i++) {
+            $ch = $bank[$i];
+            if ($ch < '0' || $ch > '9') {
+                continue;
+            }
+
+            $digit = ord($ch) - 48;
+
+            if ($digit > $bestDigit) {
+                $bestDigit = $digit;
+                $bestIndex = $i;
+
+                if ($digit === 9) {
+                    break;
+                }
+            }
+        }
+
+        $result .= chr($bestDigit + 48);
+        $start = $bestIndex + 1;
+    }
+
+    return (int) $result;
+}
+
 function solvePart1(array $input)
 {
     $total = 0;
@@ -76,7 +126,18 @@ function solvePart1(array $input)
 
 function solvePart2(array $input)
 {
-    return null;
+    $total = 0;
+
+    foreach ($input as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            continue;
+        }
+
+        $total += maxBankJoltage12($line);
+    }
+
+    return $total;
 }
 
 $profiler = new Profiler();
