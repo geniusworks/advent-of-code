@@ -130,7 +130,20 @@ function solvePart1(array $input)
 
 function solvePart2(array $input)
 {
-    return null;
+    [$ranges, ] = parseDatabase($input);
+
+    if (empty($ranges)) {
+        return 0;
+    }
+
+    $merged = mergeRanges($ranges);
+
+    $total = 0;
+    foreach ($merged as [$start, $end]) {
+        $total += ($end - $start + 1);
+    }
+
+    return $total;
 }
 
 $profiler = new Profiler();
