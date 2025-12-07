@@ -100,7 +100,84 @@ function solvePart1(array $input)
 
 function solvePart2(array $input)
 {
-    return null;
+    $lines = [];
+
+    foreach ($input as $line) {
+        $lines[] = rtrim($line, "\r\n");
+    }
+
+    $rows = count($lines);
+    if ($rows === 0) {
+        return 0;
+    }
+
+    $cols = 0;
+    foreach ($lines as $line) {
+        $len = strlen($line);
+        if ($len > $cols) {
+            $cols = $len;
+        }
+    }
+
+    if ($cols === 0) {
+        return 0;
+    }
+
+    $startRow = -1;
+    $startCol = -1;
+
+    for ($r = 0; $r < $rows; $r++) {
+        $len = strlen($lines[$r]);
+        for ($c = 0; $c < $len; $c++) {
+            if ($lines[$r][$c] === 'S') {
+                $startRow = $r;
+                $startCol = $c;
+                break 2;
+            }
+        }
+    }
+
+    if ($startRow === -1) {
+        return 0;
+    }
+
+    $startRow++;
+    if ($startRow >= $rows) {
+        return 1;
+    }
+
+    $current = array_fill(0, $cols, 0);
+    $current[$startCol] = 1;
+
+    for ($r = $startRow; $r < $rows; $r++) {
+        $next = array_fill(0, $cols, 0);
+        $line = $lines[$r];
+        $lineLen = strlen($line);
+
+        for ($c = 0; $c < $cols; $c++) {
+            $count = $current[$c];
+            if ($count === 0) {
+                continue;
+            }
+
+            $ch = ($c < $lineLen) ? $line[$c] : '.';
+
+            if ($ch === '^') {
+                if ($c > 0) {
+                    $next[$c - 1] += $count;
+                }
+                if ($c + 1 < $cols) {
+                    $next[$c + 1] += $count;
+                }
+            } else {
+                $next[$c] += $count;
+            }
+        }
+
+        $current = $next;
+    }
+
+    return array_sum($current);
 }
 
 $profiler = new Profiler();
