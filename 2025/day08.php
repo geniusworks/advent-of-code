@@ -163,7 +163,100 @@ function solvePart1(array $input)
 
 function solvePart2(array $input)
 {
-    return null;
+    $points = [];
+
+    foreach ($input as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            continue;
+        }
+
+        $parts = explode(',', $line);
+        if (count($parts) !== 3) {
+            continue;
+        }
+
+        $x = (int) $parts[0];
+        $y = (int) $parts[1];
+        $z = (int) $parts[2];
+
+        $points[] = [$x, $y, $z];
+    }
+
+    $n = count($points);
+    if ($n < 2) {
+        return 0;
+    }
+
+    $inMst = array_fill(0, $n, false);
+    $minDist = array_fill(0, $n, PHP_INT_MAX);
+    $parent = array_fill(0, $n, -1);
+
+    $minDist[0] = 0;
+
+    for ($iter = 0; $iter < $n; $iter++) {
+        $u = -1;
+        $best = PHP_INT_MAX;
+
+        for ($i = 0; $i < $n; $i++) {
+            if (!$inMst[$i] && $minDist[$i] < $best) {
+                $best = $minDist[$i];
+                $u = $i;
+            }
+        }
+
+        if ($u === -1) {
+            break;
+        }
+
+        $inMst[$u] = true;
+
+        $pu = $points[$u];
+        $ux = $pu[0];
+        $uy = $pu[1];
+        $uz = $pu[2];
+
+        for ($v = 0; $v < $n; $v++) {
+            if ($inMst[$v] || $v === $u) {
+                continue;
+            }
+
+            $pv = $points[$v];
+            $dx = $ux - $pv[0];
+            $dy = $uy - $pv[1];
+            $dz = $uz - $pv[2];
+
+            $dist2 = $dx * $dx + $dy * $dy + $dz * $dz;
+
+            if ($dist2 < $minDist[$v]) {
+                $minDist[$v] = $dist2;
+                $parent[$v] = $u;
+            }
+        }
+    }
+
+    $maxDist2 = -1;
+    $bestU = 0;
+    $bestV = 1;
+
+    for ($v = 1; $v < $n; $v++) {
+        $u = $parent[$v];
+        if ($u === -1) {
+            continue;
+        }
+
+        $w = $minDist[$v];
+        if ($w > $maxDist2) {
+            $maxDist2 = $w;
+            $bestU = $u;
+            $bestV = $v;
+        }
+    }
+
+    $x1 = $points[$bestU][0];
+    $x2 = $points[$bestV][0];
+
+    return $x1 * $x2;
 }
 
 $profiler = new Profiler();
