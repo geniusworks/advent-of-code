@@ -13,11 +13,11 @@ This repository contains my solutions to [Advent of Code](https://adventofcode.c
 
 ## About Advent of Code
 
-Advent of Code is an annual event where programmers and coders come together to solve a series of programming puzzles and challenges. The event takes place every year in December and features daily programming and problem-solving challenges.
+Advent of Code is an annual event where programmers come together to solve a series of puzzles and challenges. The event takes place every year in December and features daily contests.
 
 ## Solutions
 
-This repository contains my challenge solutions, which are organized by year and contest day (e.g. `2024/day01.php`, `2024/day02.php`, etc.).
+This repository contains my contest solutions, which are organized by year and day (e.g. `2024/day01.php`, `2024/day02.php`, etc.).
 
 ## Running the Solutions
 
