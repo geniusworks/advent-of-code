@@ -2,6 +2,9 @@
 /**
  * Advent of Code 2025
  * Day 9: Movie Theater
+ *
+ * @author Martin Diekhoff
+ * @link https://adventofcode.com/2025/day/9
  */
 
 const DATA_INPUT_FILE = 'input09.txt';
