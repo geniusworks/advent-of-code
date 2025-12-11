@@ -90,7 +90,79 @@ function solvePart1(array $input)
 
 function solvePart2(array $input)
 {
-    return 0;
+    $graph = [];
+
+    foreach ($input as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            continue;
+        }
+
+        $parts = explode(':', $line, 2);
+        if (count($parts) !== 2) {
+            continue;
+        }
+
+        $from = trim($parts[0]);
+        $rest = trim($parts[1]);
+        if ($rest === '') {
+            $graph[$from] = [];
+            continue;
+        }
+
+        $to = preg_split('/\s+/', $rest);
+        $targets = [];
+        foreach ($to as $t) {
+            $t = trim($t);
+            if ($t !== '') {
+                $targets[] = $t;
+            }
+        }
+
+        if (!isset($graph[$from])) {
+            $graph[$from] = $targets;
+        } else {
+            $graph[$from] = array_merge($graph[$from], $targets);
+        }
+    }
+
+    $start = 'svr';
+    $end = 'out';
+    $dac = 'dac';
+    $fft = 'fft';
+
+    $memo = [];
+
+    $countPaths = function ($node, bool $seenDac, bool $seenFft) use (&$countPaths, &$graph, &$memo, $end, $dac, $fft) {
+        if ($node === $dac) {
+            $seenDac = true;
+        }
+        if ($node === $fft) {
+            $seenFft = true;
+        }
+
+        $key = $node . '|' . ($seenDac ? '1' : '0') . ($seenFft ? '1' : '0');
+        if (isset($memo[$key])) {
+            return $memo[$key];
+        }
+
+        if ($node === $end) {
+            $memo[$key] = ($seenDac && $seenFft) ? 1 : 0;
+            return $memo[$key];
+        }
+
+        $total = 0;
+        if (isset($graph[$node])) {
+            foreach ($graph[$node] as $next) {
+                $total += $countPaths($next, $seenDac, $seenFft);
+            }
+        }
+
+        $memo[$key] = $total;
+        return $total;
+    };
+
+    return $countPaths($start, false, false);
 }
 
 $profiler = new Profiler();
